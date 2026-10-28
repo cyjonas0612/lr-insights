@@ -2,12 +2,14 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>磊伯勞資充電站 ⚡ 靈感後台</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LR INSIGHTS ⚡ 磊伯勞資充電站靈感後台</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
@@ -17,13 +19,11 @@
           },
           colors: {
             brand: {
-              50: '#f0f7ff',
-              100: '#e0effe',
-              500: '#0284c7',
-              600: '#0369a1',
-              700: '#075985',
-              800: '#0c4a6e',
-              900: '#0f172a',
+              navy: '#0f172a',
+              card: '#1e293b',
+              accent: '#f59e0b',
+              accentHover: '#d97706',
+              border: '#334155'
             }
           }
         }
@@ -31,705 +31,590 @@
     }
   </script>
   <style>
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    body {
+      -webkit-tap-highlight-color: transparent;
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-16">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-16 antialiased selection:bg-amber-500 selection:text-slate-900">
 
-  <!-- Toast Notification Container -->
-  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-120%] opacity-0 pointer-events-none flex items-center gap-2 bg-slate-900 border border-amber-500/50 shadow-2xl shadow-amber-500/10 text-amber-300 px-4 py-3 rounded-xl text-sm font-medium backdrop-blur-md">
+    <span id="toastIcon">⚡</span>
+    <span id="toastMsg">通知內容</span>
+  </div>
 
-  <!-- Header -->
-  <header class="bg-brand-900 text-white shadow-lg sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-md border-b border-slate-800 px-4 py-3 sm:px-6">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <!-- 品牌識別 -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-brand-900 font-extrabold text-xl shadow-md flex-shrink-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-xl flex-shrink-0">
           磊
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-extrabold text-lg sm:text-xl tracking-tight text-white">磊伯勞資充電站</h1>
-            <span class="bg-amber-400 text-brand-900 text-xs px-2 py-0.5 rounded-full font-bold">靈感後台</span>
-          </div>
-          <p class="text-xs text-slate-300">每日法規時事掃描與社群發文雙切角庫</p>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
+            LR INSIGHTS <span class="text-amber-400 text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30">雲端連線</span>
+          </h1>
+          <p class="text-xs text-slate-400">磊伯勞資充電站 ⚡ 試算表靈感即時庫</p>
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <a id="sheetLinkBtn" href="https://docs.google.com/spreadsheets/d/1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc/edit" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          開啟試算表
-        </a>
-        <button id="addIdeaBtn" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-brand-900 text-xs font-bold shadow transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          新增靈感
+      <!-- 操作按鈕群 -->
+      <div class="flex items-center gap-2">
+        <button onclick="fetchSheetData(true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-700/50 text-xs font-semibold shadow-sm transition" title="重新自試算表抓取最新資料">
+          <svg id="syncIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span>同步試算表</span>
         </button>
-        <button id="exportJsonBtn" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors border border-slate-700" title="匯出 JSON 備份">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          備份
+        <a href="https://docs.google.com/spreadsheets/d/1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc/edit" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H6v-2h3v2zm0-4H6v-2h3v2zm0-4H6V7h3v2zm10 8h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V7h8v2z"/></svg>
+          開啟檔案
+        </a>
+        <button onclick="exportJSONBackup()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition" title="備份 JSON">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span class="hidden sm:inline">備份</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-6xl mx-auto px-4 py-6">
-
-    <!-- KPI Metric Cards -->
-    <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-        <div>
-          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">總靈感數</div>
-          <div id="statTotal" class="text-2xl font-black text-brand-900 mt-0.5">24</div>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-5">
+    <!-- Metric Dashboard (KPI 數據看板) -->
+    <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm">
+        <span class="text-xs text-slate-400 font-medium">總靈感庫存</span>
+        <div class="mt-1 flex items-baseline justify-between">
+          <span id="metricTotal" class="text-2xl font-black text-white">0</span>
+          <span class="text-[10px] text-slate-500">則</span>
         </div>
-        <div class="w-9 h-9 rounded-lg bg-blue-50 text-brand-600 flex items-center justify-center font-bold text-base">📚</div>
       </div>
-      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-        <div>
-          <div class="text-xs font-semibold text-amber-600 uppercase tracking-wider">可發布</div>
-          <div id="statReady" class="text-2xl font-black text-amber-600 mt-0.5">0</div>
+      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm">
+        <span class="text-xs text-emerald-400 font-medium">可發布</span>
+        <div class="mt-1 flex items-baseline justify-between">
+          <span id="metricReady" class="text-2xl font-black text-emerald-400">0</span>
+          <span class="text-[10px] text-emerald-500/60">可直接用</span>
         </div>
-        <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-base">✨</div>
       </div>
-      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-        <div>
-          <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">已發布</div>
-          <div id="statPublished" class="text-2xl font-black text-emerald-600 mt-0.5">0</div>
+      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm">
+        <span class="text-xs text-blue-400 font-medium">已發布</span>
+        <div class="mt-1 flex items-baseline justify-between">
+          <span id="metricPublished" class="text-2xl font-black text-blue-400">0</span>
+          <span class="text-[10px] text-blue-500/60">FB / Threads</span>
         </div>
-        <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-base">🚀</div>
       </div>
-      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-        <div>
-          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">待微調</div>
-          <div id="statPending" class="text-2xl font-black text-slate-600 mt-0.5">0</div>
+      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm">
+        <span class="text-xs text-amber-400 font-medium">待修改</span>
+        <div class="mt-1 flex items-baseline justify-between">
+          <span id="metricDraft" class="text-2xl font-black text-amber-400">0</span>
+          <span class="text-[10px] text-amber-500/60">調整中</span>
         </div>
-        <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-base">✍️</div>
       </div>
     </section>
 
-    <!-- Filters & Search Toolbar -->
-    <section class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6 space-y-3">
+    <!-- Toolbar & Filters -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 mb-6 shadow-sm space-y-3">
       <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-        <!-- Search bar -->
+        <!-- 搜尋列 -->
         <div class="relative flex-1">
-          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" id="searchInput" placeholder="搜尋議題關鍵字、法規、爭點或 Hook..." class="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="搜尋議題標題、爭點、切角 Hook、觀點或防禦SOP..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
         </div>
-
-        <!-- Status Filter -->
+        
+        <!-- 狀態篩選 -->
         <div class="flex items-center gap-2">
-          <label for="statusFilter" class="text-xs text-slate-500 font-semibold whitespace-nowrap">狀態：</label>
-          <select id="statusFilter" class="bg-slate-50 border border-slate-200 text-xs font-medium rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <select id="statusFilter" onchange="handleStatusFilter(this.value)" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm text-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500 transition">
             <option value="ALL">全部狀態</option>
-            <option value="待修改">待修改</option>
             <option value="可發布">可發布</option>
+            <option value="待修改">待修改</option>
             <option value="已發FB">已發FB</option>
             <option value="已發Threads">已發Threads</option>
             <option value="封存">封存</option>
           </select>
-          <button id="resetDataBtn" class="text-xs text-slate-400 hover:text-rose-600 px-2 py-1 transition-colors whitespace-nowrap" title="重置回預設資料">
-            重置
-          </button>
+          <span id="lastSyncTime" class="text-[11px] text-slate-500 font-mono whitespace-nowrap hidden sm:inline">讀取中...</span>
         </div>
       </div>
 
-      <!-- Category Filter Pills -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 text-xs" id="categoryPills">
-        <button data-cat="ALL" class="cat-pill px-3 py-1.5 rounded-full font-bold bg-brand-900 text-white transition-all whitespace-nowrap">
+      <!-- 分類標籤滑動列（自動由資料動態生成） -->
+      <div id="categoryPills" class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-0.5">
+        <button onclick="handleCategoryFilter('ALL')" data-cat="ALL" class="cat-pill active px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition bg-amber-500 border-amber-500 text-slate-950 shadow-sm">
           全部議題
-        </button>
-        <button data-cat="重大爭議" class="cat-pill px-3 py-1.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all whitespace-nowrap">
-          重大爭議
-        </button>
-        <button data-cat="薪資加班" class="cat-pill px-3 py-1.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all whitespace-nowrap">
-          薪資加班
-        </button>
-        <button data-cat="請假特休" class="cat-pill px-3 py-1.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all whitespace-nowrap">
-          請假特休
-        </button>
-        <button data-cat="聘僱離職" class="cat-pill px-3 py-1.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all whitespace-nowrap">
-          聘僱離職
-        </button>
-        <button data-cat="職災安全" class="cat-pill px-3 py-1.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all whitespace-nowrap">
-          職災安全
-        </button>
-        <button data-cat="政策法遵" class="cat-pill px-3 py-1.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all whitespace-nowrap">
-          政策法遵
         </button>
       </div>
     </section>
 
-    <!-- Cards Grid -->
-    <section id="cardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Dynamic Rendered Cards -->
+    <!-- Loading State -->
+    <div id="loadingState" class="py-20 text-center">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-400 mb-3"></div>
+      <p class="text-sm text-slate-400">正在自 Google 試算表讀取最新靈感資料庫...</p>
+    </div>
+
+    <!-- Cards Grid (雙切角靈感卡片區) -->
+    <section id="cardsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-5 hidden">
+      <!-- 卡片由 JavaScript 動態渲染 -->
     </section>
 
     <!-- Empty State -->
-    <div id="emptyState" class="hidden py-16 text-center bg-white rounded-xl border border-slate-200">
-      <div class="text-4xl mb-2">🔍</div>
-      <h3 class="font-bold text-slate-700 text-base">找不到相符的靈感議題</h3>
-      <p class="text-xs text-slate-400 mt-1">請嘗試不同關鍵字或調整篩選條件</p>
+    <div id="emptyState" class="hidden py-16 text-center">
+      <div class="inline-flex p-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-500 mb-3 text-3xl">
+        🔍
+      </div>
+      <p class="text-sm text-slate-400 font-medium">沒有找到符合條件的靈感議題</p>
+      <button onclick="clearFilters()" class="mt-3 text-xs text-amber-400 hover:underline">清除篩選條件</button>
     </div>
-
   </main>
 
-  <!-- Edit / Add Modal -->
-  <div id="ideaModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col my-auto">
-      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-        <h3 id="modalTitle" class="font-black text-slate-800 text-lg">編輯發想靈感</h3>
-        <button id="modalCloseBtn" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <form id="ideaForm" class="p-5 space-y-4 text-xs">
-        <input type="hidden" id="editId">
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">日期</label>
-            <input type="date" id="formDate" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">議題分類</label>
-            <select id="formCategory" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500">
-              <option value="重大爭議">重大爭議</option>
-              <option value="薪資加班">薪資加班</option>
-              <option value="請假特休">請假特休</option>
-              <option value="聘僱離職">聘僱離職</option>
-              <option value="職災安全">職災安全</option>
-              <option value="政策法遵">政策法遵</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">發布狀態</label>
-            <select id="formStatus" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500">
-              <option value="待修改">待修改</option>
-              <option value="可發布">可發布</option>
-              <option value="已發FB">已發FB</option>
-              <option value="已發Threads">已發Threads</option>
-              <option value="封存">封存</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">議題名稱 (Topic)</label>
-          <input type="text" id="formTopic" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500" placeholder="例如：美光 AI 獲利創新高爆發罷工危機...">
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">核心法規 (Labor Law)</label>
-          <input type="text" id="formLaw" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500" placeholder="例如：勞基法第24條、第38條...">
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">時事與法令爭點摘要</label>
-          <textarea id="formSummary" rows="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500"></textarea>
-        </div>
-
-        <!-- Angle A -->
-        <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100 space-y-2">
-          <div class="font-black text-brand-900 flex items-center justify-between">
-            <span>切角 A（老闆 / 人資視角）</span>
-            <input type="text" id="formAngleAAud" placeholder="受眾標籤" class="text-xs px-2 py-0.5 rounded bg-white border border-blue-200 text-brand-700 font-semibold">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-600 mb-0.5">破題 Hook</label>
-            <input type="text" id="formAngleAHook" class="w-full px-3 py-1.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-brand-500">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-600 mb-0.5">核心觀點與防禦 SOP</label>
-            <textarea id="formAngleAContent" rows="2" class="w-full px-3 py-1.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-brand-500"></textarea>
-          </div>
-        </div>
-
-        <!-- Angle B -->
-        <div class="p-3 bg-amber-50/60 rounded-xl border border-amber-100 space-y-2">
-          <div class="font-black text-amber-900 flex items-center justify-between">
-            <span>切角 B（勞工 / Threads 視角）</span>
-            <input type="text" id="formAngleBAud" placeholder="受眾標籤" class="text-xs px-2 py-0.5 rounded bg-white border border-amber-200 text-amber-700 font-semibold">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-600 mb-0.5">破題 Hook</label>
-            <input type="text" id="formAngleBHook" class="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-lg focus:ring-2 focus:ring-brand-500">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-600 mb-0.5">核心觀點與防禦 SOP</label>
-            <textarea id="formAngleBContent" rows="2" class="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-lg focus:ring-2 focus:ring-brand-500"></textarea>
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">修改與發布備註</label>
-          <input type="text" id="formNotes" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500" placeholder="例如：準備本週四發布、已獲客戶共鳴...">
-        </div>
-
-        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-          <button type="button" id="modalCancelBtn" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold transition-colors">
-            取消
-          </button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-brand-900 text-white hover:bg-brand-800 font-bold shadow transition-colors">
-            儲存靈感
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script>
-    // Initial Database
-    const defaultData = [{"id": 1, "date": "2026-10-21", "category": "重大爭議", "topic": "美光 AI 獲利創新高爆發罷工危機——高科技業「分紅機制」與勞資角力", "law": "勞資爭議處理法、勞基法第2條工資定義", "summary": "受惠AI需求大爆發，美光獲利創新高，但工會抗議分紅制度不透明發動爭議行為與罷工投票，要求制度化紅利共享。", "angle_a_aud": "老闆與人資避險", "angle_a_hook": "公司今年大賺幾十億、發了百萬獎金，員工卻要罷工，老闆到底做錯了什麼？", "angle_a_content": "恩惠性勉勵獎金若名目不清易引發工資認定爭端。建議契約明訂績效獎金發放要件與審查裁量權，建立透明溝通避免演變成勞資罷工爭議。", "angle_b_aud": "職場與Threads熱議", "angle_b_hook": "別羨慕科技業年薪 300 萬，你知道「分紅」跟「薪水」在法律上的致命差別嗎？", "angle_b_content": "分紅非經常性給與，底薪偏低會拉低加班費基數、勞保投保薪資與勞退提繳。上班族應審視薪資結構保障自身厚度。", "status": "可發布", "notes": ""}, {"id": 2, "date": "2026-10-21", "category": "政策法遵", "topic": "勞動部修正「勞資會議應行注意事項」——嚴查「幽靈會議」與「代簽紀錄」", "law": "勞動基準法第30條、第32條、第83條", "summary": "勞動部修正注意事項，嚴查定期召開與代表親簽。虛偽會議紀錄一旦失效，四週/八週變形工時與加班同意全數無效。", "angle_a_aud": "企業主止損", "angle_a_hook": "為了省 10 分鐘開會，偽造一份勞資會議紀錄，最後要補發 80 萬加班費，划算嗎？", "angle_a_content": "長年先簽後印被勞檢抓包，變形工時直接打回原形，超過8小時全算加班費。落實每3個月召開親簽會議才是最低防禦成本。", "angle_b_aud": "人資自保", "angle_b_hook": "老闆叫你「去叫員工簽一簽就好」，人資朋友請先看清楚刑法第 215 條業務登載不實。", "angle_b_content": "代簽或偽造勞資會議紀錄涉刑責。善用開會通知、簽到表及會議紀錄完整留存，保護公司也保護承辦人自身。", "status": "可發布", "notes": ""}, {"id": 3, "date": "2026-10-21", "category": "職災安全", "topic": "颱風天出勤通勤費雇主負擔新規——計程車費與通勤職災責任", "law": "天然災害出勤要點、勞基法第59條職災補償", "summary": "颱風停班日要求員工出勤，衍生交通費用（如計程車）雇主應予負擔，且強風豪雨出勤發生意外屬雇主無過失補償責任。", "angle_a_aud": "企業主避險", "angle_a_hook": "颱風天叫員工上班，省了幾百塊計程車費，萬一摔車骨折，你要賠的是 40 個月的原領工資補償。", "angle_a_content": "停班日出勤騎車摔傷屬勞保職災，雇主負無過失補償責任。全額實報實銷計程車資是雇主最便宜的避險保險。", "angle_b_aud": "勞工共鳴", "angle_b_hook": "停班天老闆在群組傳「大家辛苦了，注意安全」，卻沒補上一句「今天車資找公司報銷」。", "angle_b_content": "天然災害勞工有安全退避權，雇主要求出勤應提供安全交通工具或報銷計程車，保留通訊對話確認報銷保障權益。", "status": "待修改", "notes": ""}, {"id": 4, "date": "2026-10-22", "category": "請假特休", "topic": "10 月婚假延長至 14 天新制生效——「第 9 至 14 天工資補助」與離職爭議", "law": "勞工請假規則第2條、勞動部婚假工資補助要點", "summary": "2026年10月1日起婚假由8日延長為14日，第9-14天工資可向勞保局請領補助。新進員工請滿婚假即離職引發雇主熱議。", "angle_a_aud": "雇主合規與請領補助", "angle_a_hook": "新進員工到職第一週說要請 14 天婚假，休完還想走人，老闆除了苦笑還能合法做什麼？", "angle_a_content": "婚假屬法定權利不得約定任職年限限制。老闆應建立核銷流程，請領政府全額補貼之後6天薪資，並訂妥請假憑證與交接流程。", "angle_b_aud": "職場新人共鳴", "angle_b_hook": "10 月起婚假變 14 天，但人資如果跟你說「公司規定試用期不能請」，直接送他一張勞檢單。", "angle_b_content": "勞基法沒有試用期不能請婚假的規定，後6天政府全額補助雇主，備妥結婚證明提早送單即可合法休好休滿。", "status": "可發布", "notes": ""}, {"id": 5, "date": "2026-10-22", "category": "薪資加班", "topic": "下班 LINE 訊息交辦公事——「加班費認定」升級至「職場霸凌線上登錄」", "law": "勞基法第24條、職業安全衛生法、職場霸凌防治準則", "summary": "下班用通訊軟體交辦公事，截圖即推定加班工時；離峰密集疲勞轟炸更涉職場霸凌系統登錄與行政裁罰。", "angle_a_aud": "管理止損", "angle_a_hook": "主管半夜在群組傳一句「明天一早給我」，這 7 個字可能讓公司被追討 5 年加班費外加職場霸凌通報。", "angle_a_content": "建立離線工作與通訊溝通準則，非緊急禁用群組點名或要求即時回覆；緊急交辦則建置工時補登機制避免違法。", "angle_b_aud": "上班族自保", "angle_b_hook": "下班看到老闆或主管的 LINE 訊息，已讀不回到底算不算犯法？", "angle_b_content": "勞動契約不包含私人時間，已讀不回完全合法。若因未回覆遭考績打壓，截圖保留訊息作為違法處分申訴鐵證。", "status": "已發FB", "notes": "反應熱烈，很多HR詢問通訊管理辦法範本"}, {"id": 6, "date": "2026-10-22", "category": "請假特休", "topic": "年底離職與特休結算前哨戰——「曆年制轉週年制」少算一天罰 2 萬", "law": "勞基法第38條第4項、勞基法施行細則第24-1條", "summary": "曆年制屬行政簡便措施，員工離職時依法一律回歸「週年制」結算未休日數工資，若少算短發即屬違反全額給付。", "angle_a_aud": "人資會計系統合規", "angle_a_hook": "為了年底做帳方便用曆年制，員工一離職少算半天特休，公司直接被罰 2 萬，你的 Excel 算對了嗎？", "angle_a_content": "離職必須還原到職日起算之法定週年制天數，兩者取其高補足差額。系統應內建轉換模組，由員工簽認結算清冊避險。", "angle_b_aud": "離職權益自保", "angle_b_hook": "提離職時人資跟你說「特休依比例只能休到今天」，先別急著簽字，你很可能被偷走好幾天薪水。", "angle_b_content": "滿半年3天、滿1年7天是法定整包權利，離職不得打折扣除。利用勞動部試算系統核對，差額全額折現請求。", "status": "可發布", "notes": ""}, {"id": 7, "date": "2026-10-23", "category": "職災安全", "topic": "勞動部發布「旅宿業中高齡就業指引」——缺工解方背後的「退休再就業投保」地雷", "law": "勞工職業災害保險及保護法、勞基法第59條", "summary": "勞動部發布中高齡就業指引推動工作拆解。但進用已退休人員，雇主仍強制加保職災保險，否則職災補償全額自負。", "angle_a_aud": "旅宿餐飲雇主避險", "angle_a_hook": "請退休大哥大姐來兼職，每個月省下 60 塊職災保險費，員工滑倒骨折，你要自己賠 30 萬。", "angle_a_content": "已領勞保給付人員雖免普通勞保，但職保為強制投保。每月幾十元保費轉嫁巨額職災醫療工資補償風險。", "angle_b_aud": "高齡二度就業", "angle_b_hook": "退休後想去飯店兼職打工賺零用錢，老闆跟你說「因為你退休了所以不用加保」，請馬上轉身就走。", "angle_b_content": "退休再就業一樣享有職災保險保障。確認到職第一天加保職保，避免工作意外求償無門。", "status": "待修改", "notes": ""}, {"id": 8, "date": "2026-10-23", "category": "聘僱離職", "topic": "離職「競業禁止條款」沒給補償金——《勞基法》第 9-1 條「直接形同白紙」", "law": "勞動基準法第9條之1、勞基法施行細則第7-3條", "summary": "約定離職後競業禁止，雇主未每月給予不低於平均工資50%之合理補償，約定自始無效。", "angle_a_aud": "企業主止損", "angle_a_hook": "拿網路抓的競業禁止合約叫員工簽，一毛補償金都不給，你以為綁住了人才，在法官眼裡那只是一張廢紙。", "angle_a_content": "核心人才簽競業禁止並依法編列50%補償預算；一般員工強化營業秘密法NDA與智慧財產權歸屬，才是高防禦且零違法成本做法。", "angle_b_aud": "轉職求職者", "angle_b_hook": "離職時主管嗆你「你簽過競業禁止，敢去對手公司我就告死你」，你只要回他一句話他就閉嘴了。", "angle_b_content": "詢問公司離職後是否按月匯入半薪補償金。若未給補償金，條款自始無效，不必受恐嚇信威脅。", "status": "已發Threads", "notes": "Threads破百讚"}, {"id": 9, "date": "2026-10-23", "category": "聘僱離職", "topic": "外送專法規範效應蔓延——連鎖餐飲「假承攬真外送」的勞檢追索風暴", "law": "外送員權益保障及平臺管理法、勞動基準法僱傭認定", "summary": "外送專法上路後，餐飲自招外送員簽承攬合約，但若受指揮監督、排班穿制服，勞檢直接認定為僱傭追繳勞退加班費。", "angle_a_aud": "餐飲零售老闆", "angle_a_hook": "嫌外送平台抽成高，自己找外送員簽「論件計酬承攬合約」？勞檢一進門，補稅加罰款保證比抽成貴 10 倍。", "angle_a_content": "只要管時間、管服裝、指派單量即具從屬性。自聘外送員應採部分工時僱傭，依法投保並提供防護設施，避免假承攬重罰。", "angle_b_aud": "外送兼職從業人員", "angle_b_hook": "幫便當店跑外送，老闆說「你是接案承攬沒有勞健保」，但排班請假都要他批准？恭喜你，你其實是正職員工待遇的受害者。", "angle_b_content": "保留排班表、對話紀錄與送單打卡。具備從屬性即可向勞檢申訴補繳勞保年資與追討勞退 6%。", "status": "待修改", "notes": ""}, {"id": 10, "date": "2026-10-24", "category": "聘僱離職", "topic": "試用期不適任「當天叫員工走人」——非法解僱與資遣費地雷", "law": "勞基法第11條第5款、第16條、第17條", "summary": "勞基法無試用期豁免條款。終止契約仍須具備法定事由，給付資遣費並開立非自願離職證明，強逼自請離職易成非法解僱。", "angle_a_aud": "雇主用人避險", "angle_a_hook": "覺得試用期新人不行，當天叫他收桌子走人，幾個月後你可能要掏出 30 萬補發他沒上班期間的工資。", "angle_a_content": "建立第30天/60天考核面談紀錄，不適任依法資遣、申報通報並開非自願離職證明，花幾千元資遣費買斷巨額爭議風險。", "angle_b_aud": "職場求職者自保", "angle_b_hook": "試用期最後一天主管把你叫進會議室，遞一張「自請離職單」要你簽，請把雙手插進口袋絕對別碰筆。", "angle_b_content": "公司認定不適任應開立非自願離職證明發給資遣費，以利申請6個月失業給付。切勿自簽離職放棄權益。", "status": "可發布", "notes": ""}, {"id": 11, "date": "2026-10-24", "category": "薪資加班", "topic": "假調職真逼退——《勞基法》第 10-1 條「調動五原則」與隱形減薪", "law": "勞動基準法第10條之1、第14條第1項第6款", "summary": "調職調外縣市、扣除職務加給或片面減薪，均違反調動五原則。勞工得不經預告終止契約並索討資遣費。", "angle_a_aud": "管理止損", "angle_a_hook": "想逼走看不順眼的員工，把他從總部調去物流倉庫還順便砍薪 3,000，結果隔天收到存證信函要資遣費。", "angle_a_content": "調動不得作不利變更，動薪水或未補貼交通成本即屬違法。調職前應取得合意並給予通勤或住宿協助。", "angle_b_aud": "上班族抗辯權益", "angle_b_hook": "明天突然被通知「下週調去外縣市分公司，薪水還要少五千」，千萬別默默吞下去。", "angle_b_content": "片面減薪與過度調動可書面拒絕，雇主強行調動可依勞基法第14條要求資遣費離職。", "status": "可發布", "notes": ""}, {"id": 12, "date": "2026-10-24", "category": "薪資加班", "topic": "病假全勤獎金「全扣」已違法——勞工請假規則新修訂與工資全額給付原則", "law": "勞工請假規則第9條第2項、勞基法第22條第2項", "summary": "新修訂勞工請假規則明訂普通傷病假扣全勤僅得按請假日數依比例扣發，請1天病假扣光全額直接觸犯工資未全額給付。", "angle_a_aud": "人資薪資計算合規", "angle_a_hook": "員工感冒請 1 天病假，你扣他整個月 3,000 塊全勤，勞檢進門第一張罰單就是 2 萬起跳。", "angle_a_content": "全勤為工資對價，扣發公式必須改為依30天按比例折算，或重整薪資結構降低全勤佔比避免罰鍰。", "angle_b_aud": "上班族反剝削", "angle_b_hook": "發燒到 39 度還是不敢請病假，因為請一天假直接被扣 3,000 塊全勤？老闆其實已經違法了。", "angle_b_content": "病假扣全勤依法僅能扣當日比例，多扣屬非法苛扣工資，可依法追溯5年請求返還溢扣差額。", "status": "可發布", "notes": ""}, {"id": 13, "date": "2026-10-25", "category": "薪資加班", "topic": "下班沒走待在辦公室——《勞動事件法》第 38 條「工時推定」核彈級地雷", "law": "勞動事件法第38條、勞動基準法第24條", "summary": "出勤紀錄登載時間法律推定為經雇主同意提供勞務。即使有申請制，雇主無具體反證即需補發巨額加班費。", "angle_a_aud": "雇主出勤管理避險", "angle_a_hook": "公司規章寫了「加班一律要申請」，員工下班留在辦公室吹冷氣，離職後卻能合法討走 40 萬加班費？", "angle_a_content": "建立異常逗留核銷阻斷機制，逗留超過30分鐘隔日發信確認是否私事，落實準時關燈閉門排除灰色工時。", "angle_b_aud": "上班族血汗加班爭取", "angle_b_hook": "每天被迫在辦公室無償加班到 8 點，主管還說「你自己手腳慢沒填申請不算加班」，教你用打卡紀錄合法討回血汗錢。", "angle_b_content": "打卡時間依法推定為工時，備妥通訊工作對話與刷卡紀錄，離職5年內皆能合法追討加班費。", "status": "可發布", "notes": ""}, {"id": 14, "date": "2026-10-25", "category": "聘僱離職", "topic": "員工離職沒提前說——老闆氣到「扣薪抵交接」反而吃上百萬罰單", "law": "勞基法第16條、第22條第2項、第26條", "summary": "未達離職預告期，雇主不得私自預扣工資作為違約賠償或扣留服務證明書，否則重罰2萬至100萬元。", "angle_a_aud": "雇主止損情緒管理", "angle_a_hook": "員工提離職說走就走、交接擺爛，老闆一氣之下扣他 5,000 塊薪水，結果隔週勞檢登門開罰 9 萬。", "angle_a_content": "薪資依法全額直接給付，營業損失另循民事請求。平常建立崗位SOP交接雲端化，避免情緒扣薪引火上身。", "angle_b_aud": "離職勞工權益", "angle_b_hook": "提離職時老闆放話「預告期不夠，最後一個月薪水你一毛都別想拿」，別害怕，這句話值 2 萬到 100 萬罰鍰。", "angle_b_content": "勞基法無未預告行政罰則，出勤工資一毛不能少。遭遇扣薪立即申請勞資調解索回全額。", "status": "待修改", "notes": ""}, {"id": 15, "date": "2026-10-25", "category": "請假特休", "topic": "育嬰留停「以日申請」新制上路——排班調度焦慮 vs 雇主千元獎勵金", "law": "性別平等工作法第16條、第21條、雇主替代人力獎勵辦法", "summary": "彈性育嬰留停開放按日申請（上限30日）領8成薪。雇主不得拒絕，但可申領每日最高1,000元代班排班獎勵金。", "angle_a_aud": "人資排班與補助領取", "angle_a_hook": "員工突然請 1 天育嬰假，主管氣得想拒絕？小心踩到性別平等工作法，其實政府每天補貼你 1,000 塊找代班！", "angle_a_content": "制定彈性育嬰假提前申請指引，並建立替代兼職人才庫，同步申請政府每日千元津貼化解排班人力荒。", "angle_b_aud": "雙薪家庭職場爸媽", "angle_b_hook": "小孩腸病毒停課一週，不用再拿自己的特休或事假硬撐，育嬰假現在可以「請單天」而且還有 8 成薪！", "angle_b_content": "不用一次請半年，單日育嬰留停搭配8成薪津貼，備妥戶籍證明提前送單兼顧家庭與考績。", "status": "可發布", "notes": ""}, {"id": 16, "date": "2026-10-26", "category": "請假特休", "topic": "年底特休「老闆強制指定排休」——《勞基法》第 38 條第 2 項排定權專屬勞工", "law": "勞基法第38條第2項、第79條", "summary": "特休排定權專屬勞工，雇主僅得提醒促請。公告全體統一排休或強制劃休，違者重罰2萬至100萬元。", "angle_a_aud": "老闆排假止損", "angle_a_hook": "公告「週五全公司統一休特休」，以為替公司省下年底折現成本，結果勞檢登門開罰 50 萬。", "angle_a_content": "強制指定排休侵犯勞工排定權。正解為定期系統提醒未休假，協商個別同意或於年底全額依法折發現金。", "angle_b_aud": "上班族假期捍衛", "angle_b_hook": "公司公告「特休年底沒休完直接統一排休」，請截圖存檔，這叫公然違反勞基法第 38 條。", "angle_b_content": "特休哪天放自己決定，拒絕強制排休。到期沒休完每一天都能換回白花花工資。", "status": "可發布", "notes": ""}, {"id": 17, "date": "2026-10-26", "category": "薪資加班", "topic": "加班換補休「到期未休完直接歸零」——《勞基法》第 32-1 條違法欠薪陷阱", "law": "勞基法第32條之1第2項、第24條加班費", "summary": "補休逾期或離職未休畢，雇主必須還原依加班當日工資率（1.34/1.67倍）折發加班費，直接歸零屬違法欠薪。", "angle_a_aud": "人資會計系統合規", "angle_a_hook": "系統設定「補休滿一年自動失效清零」，這個偷懶設定，就是讓公司吃上欠薪罪名的現行犯。", "angle_a_content": "補休本質是延期支付工資。系統屆期必須自動以加班當日倍率（1.34/1.67）計算轉發工資，嚴禁清空。", "angle_b_aud": "加班族討公道", "angle_b_hook": "辛辛苦苦加班累積了 40 個小時補休，年底人資跟你說「過期歸零囉」，別客氣直接拿法條要錢。", "angle_b_content": "沒有任何加班能被憑空抹去，截圖備份補休時數，到期要求還原加班費折現。", "status": "可發布", "notes": ""}, {"id": 18, "date": "2026-10-26", "category": "政策法遵", "topic": "《就業服務法》薪資揭露門檻擬調高至 5 萬元——告別「薪資面議」攬才黑盒子", "law": "就業服務法第5條第2項第6款", "summary": "薪資揭露門檻擬從4萬調高至5萬，低於5萬禁止面議且級距不可過寬，違者開罰6萬至30萬元。", "angle_a_aud": "雇主雇主品牌招募", "angle_a_hook": "徵才廣告寫「面議」，面試才開 3 萬 5，以後不只招不到好人才，還要先吞 6 萬元就業服務法罰單。", "angle_a_content": "透明標示薪資區間（差距宜於1-1.5萬內）建立誠信雇主品牌，避免虛偽區間遭求職者檢舉挨罰。", "angle_b_aud": "求職者面試避雷", "angle_b_hook": "請假半天跑去面試寫著「薪資面議」的工作，談到最後對方開 3 萬 2，這種公司真的可以直接拉黑。", "angle_b_content": "面議門檻拉高有助過濾假高薪職缺，投履歷確認具體待遇區間，拒絕無效面試浪費時間。", "status": "待修改", "notes": ""}, {"id": 19, "date": "2026-10-27", "category": "聘僱離職", "topic": "勞動部通令嚴查「最低服務年限綁約」——《勞基法》第 15-1 條違約金合規紅線", "law": "勞基法第15條之1、第26條預扣工資", "summary": "例行性在職訓練或法定訓練不得綁約；若有給簽約金補償，提早離職僅能按比例返還，全額追討自始無效。", "angle_a_aud": "雇主用人合約防禦", "angle_a_hook": "新人教個 3 天就叫他簽「未滿 1 年離職賠 5 萬」，這種合約不只留不住人，勞檢一來還送你一張違法處分。", "angle_a_content": "一般職缺刪除綁約條款；高額專業外部受訓才簽訂協議並留存單據，載明按比例遞減返還違約金。", "angle_b_aud": "勞工離職自由抗辯", "angle_b_hook": "到職第一天被逼簽「未做滿一年賠一個月薪水」，主管還放話提前走就要提告，教你一句話破解主管的唬人話術。", "angle_b_content": "公司內部日常訓練不可約定服務年限，違法違約金直接無效，拒絕雇主薪資預扣賠償。", "status": "可發布", "notes": ""}, {"id": 20, "date": "2026-10-27", "category": "聘僱離職", "topic": "交接沒做好就扣留「服務證明書」——《勞基法》第 19 條雇主的絕對法定義務", "law": "勞動基準法第19條、第79條", "summary": "勞動契約終止勞工請求服務證明書雇主不得拒絕，交接瑕疵不能作抗辯理由，拒發裁罰2萬至30萬元。", "angle_a_aud": "雇主止損法遵", "angle_a_hook": "員工離職擺爛沒交接，老闆氣不過扣住離職證明書，結果被勞工局開罰 30 萬外加民事賠償。", "angle_a_content": "交接瑕疵與發證是兩碼子事，客觀開具服務證明書（不得記負評），營業損害另循民事求償以保權益。", "angle_b_aud": "離職求職者維權", "angle_b_hook": "提了離職公司卻嗆「交接沒做好就不發離職證明」，只要拿出勞基法第 19 條，公司最高要被罰 30 萬。", "angle_b_content": "新職報到必備服務證明，雇主依法無權扣留，書面催告未果即向勞工局申訴追發。", "status": "可發布", "notes": ""}, {"id": 21, "date": "2026-10-27", "category": "政策法遵", "topic": "勞健保「高薪低報」省小錢——4 倍重罰、追繳 5 年與刑法詐欺得利罪", "law": "勞保條例第72條、勞退條例第14條、刑法第215條與第339條", "summary": "全薪拆分津貼高薪低報省保費，面臨4倍罰鍰追繳5年，員工請領給付短少雇主全賠，檢方常以詐欺得利罪起訴負責人。", "angle_a_aud": "企業主合規醒腦", "angle_a_hook": "每個月幫員工「高薪低報」省下 1,200 元保費，員工懷孕請領生育給付發現短少，檢察官直接用詐欺得利罪起訴老闆。", "angle_a_content": "經常性工作對價一律納入申報，高薪低報省小錢賠大罰鍰，甚至衍生刑事詐欺得利前科風險。", "angle_b_aud": "勞工退休年金自保", "angle_b_hook": "每個月實領 4 萬 5，刷勞保局 App 發現投保薪資只有 3 萬？你的生育津貼、傷病給付跟勞退金，已經被公司默默偷走幾十萬。", "angle_b_content": "定期用健保快易通或勞保App查詢投保級距，遇低報蒐集薪資單檢舉並向雇主索討短提勞退。", "status": "可發布", "notes": ""}, {"id": 22, "date": "2026-10-28", "category": "職災安全", "topic": "職災醫療期間解僱禁止——《勞基法》第 13 條「絕對保護傘」與天價工資賠償", "law": "勞動基準法第13條、第59條原領工資補償", "summary": "公傷病假醫療期間雇主絕對禁止終止契約。違法解僱僱傭關係仍存續，雇主須補足全期原領工資補償兼受重罰。", "angle_a_aud": "雇主職災管理止損", "angle_a_hook": "員工車禍請公傷假半年還沒好，你忍不住把他退保資遣，結果法官判你解僱無效，還要倒貼 80 萬薪水。", "angle_a_content": "醫療期間資遣解僱一律無效。應利用職災保險給付抵充工資，待醫療終止後經職醫評估再依法復工或合意安置。", "angle_b_aud": "職災勞工保障", "angle_b_hook": "上班出車禍腳骨折在家休養，主管突然傳 LINE 說「職缺不能等你太久，下個月把你資遣」，請把勞基法第 13 條貼給他看。", "angle_b_content": "醫療期間享有公傷病假與原領工資保障，雇主無權片面解僱，妥善保管公立醫院診斷證明合法請假。", "status": "可發布", "notes": ""}, {"id": 23, "date": "2026-10-28", "category": "薪資加班", "topic": "員工做錯事直接「扣薪賠償」——《勞基法》第 26 條預扣工資禁止與重罰地雷", "law": "勞基法第26條、第22條第2項全額給付", "summary": "打破餐盤、車禍或疏失，未經勞雇協議確定或法院裁判前雇主私自從薪水扣款賠償，處9萬至45萬元罰鍰。", "angle_a_aud": "管理營運止損", "angle_a_hook": "外送員打翻便當、司機倒車撞壞後照鏡，老闆隨手在薪資單上扣 3,000 塊，隔天勞檢開罰 9 萬起跳。", "angle_a_content": "工資應全額發放，損害賠償另行調查協議交付或投保商業保險轉嫁，私自預扣工資直接觸法吃重罰。", "angle_b_aud": "上班族反扣薪", "angle_b_hook": "月底看薪資單發現被公司列了一筆「疏失罰款扣 2,000 元」，恭喜你，這張薪資單就是檢舉公司的無敵鐵證。", "angle_b_content": "做錯事可檢討但不能扣薪，任何未經合意扣抵薪水均屬違法，保留薪資單向勞檢申訴。", "status": "可發布", "notes": ""}, {"id": 24, "date": "2026-10-28", "category": "政策法遵", "topic": "薪資單未載明「各項目計算方式」——《勞基法》第 23 條第 2 項勞檢常勝開罰榜首", "law": "勞基法第23條第2項、施行細則第14條之1", "summary": "雇主給付工資應主動提供各項目計算方式明細（工時、加班加乘、加給與扣款）。只發總額最高罰100萬元。", "angle_a_aud": "人資會計系統合規", "angle_a_hook": "薪資有按時匯、加班費一毛沒少給，只因為薪資單寫得太簡單，勞檢一來直接被罰 2 萬。", "angle_a_content": "薪資單必須列出本薪、津貼明細、加班時數與1.34/1.67倍率及法定扣繳，避免只給實發總額遭勞檢重罰。", "angle_b_aud": "上班族薪資核對", "angle_b_hook": "每個月發薪水只收到一條銀行入帳簡訊，從來沒看過薪資單？公司可能正在偷藏你的加班費。", "angle_b_content": "薪資明細為法定知情權，確認底薪、加班倍率與扣除額是否依法計算，拒絕無明細黑箱薪資。", "status": "可發布", "notes": ""}];
+    // 試算表設定 (對應：磊伯勞資充電站_社群發想靈感資料庫)
+    const SPREADSHEET_ID = '1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc';
+    const SHEET_NAME = '社群發想靈感庫';
+    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v2';
 
-    // Load from localStorage or fallback
     let ideas = [];
-    try {
-      const stored = localStorage.getItem('leibo_ideas_store_v1');
-      if (stored) {
-        ideas = JSON.parse(stored);
-      } else {
-        ideas = defaultData;
-        localStorage.setItem('leibo_ideas_store_v1', JSON.stringify(ideas));
+    let currentCategory = 'ALL';
+    let currentStatus = 'ALL';
+    let searchQuery = '';
+
+    // 初始化載入
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. 先嘗試讀取本地快取（秒開）
+      const cached = localStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          ideas = parsed.data || [];
+          if (parsed.timestamp) {
+            updateSyncTimeDisplay(parsed.timestamp);
+          }
+          if (ideas.length > 0) {
+            hideLoading();
+            renderAll();
+          }
+        } catch (e) {
+          console.error('快取解析失敗', e);
+        }
       }
-    } catch (e) {
-      console.warn('localStorage error, using defaults', e);
-      ideas = defaultData;
+
+      // 2. 背景或首次從 Google 試算表同步
+      fetchSheetData(ideas.length === 0);
+    });
+
+    // 從 Google Visualization API 抓取試算表資料
+    function fetchSheetData(showLoadingIndicator = false) {
+      if (showLoadingIndicator) {
+        showLoading();
+      }
+
+      const syncIcon = document.getElementById('syncIcon');
+      if (syncIcon) syncIcon.classList.add('animate-spin');
+
+      // 使用 tqx=out:json 取得 Google Visualization 資料
+      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&t=${Date.now()}`;
+
+      fetch(url)
+        .then(res => res.text())
+        .then(text => {
+          // Google API 回應格式為: /*O_o*/ google.visualization.Query.setResponse({...});
+          const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+          const json = JSON.parse(jsonText);
+          const rows = json.table.rows;
+
+          if (!rows || rows.length === 0) {
+            showToast('試算表內無資料');
+            hideLoading();
+            return;
+          }
+
+          // 對照試算表 A~Q 欄位解析
+          ideas = rows.map((row, index) => {
+            const getVal = (colIndex) => {
+              if (!row.c || !row.c[colIndex]) return '';
+              const cell = row.c[colIndex];
+              return (cell.f || cell.v !== null ? String(cell.v || cell.f) : '').trim();
+            };
+
+            const id = getVal(0) || `idea_${index + 1}`;
+            let dateVal = getVal(1);
+            // 處理 Date(YYYY,M,D) 格式轉換
+            if (dateVal.startsWith('Date(')) {
+              const parts = dateVal.match(/\d+/g);
+              if (parts && parts.length >= 3) {
+                const y = parts[0];
+                const m = String(Number(parts[1]) + 1).padStart(2, '0');
+                const d = String(parts[2]).padStart(2, '0');
+                dateVal = `${y}-${m}-${d}`;
+              }
+            }
+
+            return {
+              id: id,
+              date: dateVal || '2026-10-28',
+              category: getVal(2) || '重大勞資爭議',
+              title: getVal(3) || '未命名議題',
+              controversy: getVal(4) || '',
+              angleA: {
+                audience: getVal(5) || '老闆與人資避險視角',
+                hook: getVal(6) || '',
+                core: getVal(7) || '',
+                defense: getVal(8) || '',
+                cta: getVal(9) || ''
+              },
+              angleB: {
+                audience: getVal(10) || '職場與社群視角',
+                hook: getVal(11) || '',
+                core: getVal(12) || '',
+                defense: getVal(13) || '',
+                cta: getVal(14) || ''
+              },
+              status: getVal(15) || '可發布',
+              note: getVal(16) || ''
+            };
+          });
+
+          // 寫入本機快取
+          const nowStr = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            data: ideas,
+            timestamp: nowStr
+          }));
+
+          updateSyncTimeDisplay(nowStr);
+          hideLoading();
+          renderAll();
+          showToast(`已自試算表成功同步 ${ideas.length} 則靈感！`);
+        })
+        .catch(err => {
+          console.error('讀取 Google 試算表失敗：', err);
+          hideLoading();
+          if (ideas.length === 0) {
+            showToast('試算表讀取失敗，請確認共用權限為「知道連結者皆可查看」');
+          } else {
+            showToast('雲端讀取異常，已維持本機快取資料');
+          }
+        })
+        .finally(() => {
+          if (syncIcon) syncIcon.classList.remove('animate-spin');
+        });
     }
 
-    // Save helper
-    function saveIdeas() {
-      try {
-        localStorage.setItem('leibo_ideas_store_v1', JSON.stringify(ideas));
-      } catch (e) {
-        console.warn('Cannot save to localStorage', e);
+    function showLoading() {
+      document.getElementById('loadingState').classList.remove('hidden');
+      document.getElementById('cardsGrid').classList.add('hidden');
+      document.getElementById('emptyState').classList.add('hidden');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('cardsGrid').classList.remove('hidden');
+    }
+
+    function updateSyncTimeDisplay(timeStr) {
+      const el = document.getElementById('lastSyncTime');
+      if (el) {
+        el.textContent = `同步時間 ${timeStr}`;
+        el.classList.remove('hidden');
       }
-      updateStats();
+    }
+
+    // 渲染資料與統計
+    function renderAll() {
+      renderMetrics();
+      renderCategoryPills();
       renderCards();
     }
 
-    // Toast Notification helper
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `px-4 py-2.5 rounded-xl text-xs font-bold shadow-xl border flex items-center gap-2 transform transition-all duration-300 pointer-events-auto ${
-        type === 'success' 
-          ? 'bg-slate-900 text-white border-slate-700' 
-          : 'bg-rose-600 text-white border-rose-500'
-      }`;
-      toast.innerHTML = `<span>${type === 'success' ? '⚡' : '⚠️'}</span><span>${message}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(-10px)';
-        setTimeout(() => toast.remove(), 300);
-      }, 2400);
+    function renderMetrics() {
+      const total = ideas.length;
+      const ready = ideas.filter(i => i.status === '可發布').length;
+      const published = ideas.filter(i => i.status === '已發FB' || i.status === '已發Threads').length;
+      const draft = ideas.filter(i => i.status === '待修改').length;
+
+      document.getElementById('metricTotal').textContent = total;
+      document.getElementById('metricReady').textContent = ready;
+      document.getElementById('metricPublished').textContent = published;
+      document.getElementById('metricDraft').textContent = draft;
     }
 
-    // Copy to clipboard with fallback
-    function copyText(text, toastMsg = '已複製到剪貼簿！') {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          showToast(toastMsg);
-        }).catch(() => {
-          fallbackCopy(text, toastMsg);
-        });
-      } else {
-        fallbackCopy(text, toastMsg);
-      }
+    // 動態渲染分類藥丸標籤
+    function renderCategoryPills() {
+      const container = document.getElementById('categoryPills');
+      const categories = ['ALL', ...new Set(ideas.map(i => i.category).filter(Boolean))];
+
+      container.innerHTML = categories.map(cat => {
+        const isActive = cat === currentCategory;
+        const label = cat === 'ALL' ? '全部議題' : cat;
+        const activeClass = "cat-pill active px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition bg-amber-500 border-amber-500 text-slate-950 shadow-sm";
+        const inactiveClass = "cat-pill px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border border-slate-800 bg-slate-950 text-slate-300 hover:border-slate-700 transition";
+
+        return `
+          <button onclick="handleCategoryFilter('${cat}')" data-cat="${cat}" class="${isActive ? activeClass : inactiveClass}">
+            ${label}
+          </button>
+        `;
+      }).join('');
     }
 
-    function fallbackCopy(text, toastMsg) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      try {
-        document.execCommand('copy');
-        showToast(toastMsg);
-      } catch (err) {
-        showToast('複製失敗，請手動選取複製', 'error');
-      }
-      ta.remove();
-    }
-
-    // Status Badge Color Map
-    const statusColors = {
-      '待修改': 'bg-slate-100 text-slate-700 border-slate-300',
-      '可發布': 'bg-amber-50 text-amber-700 border-amber-300',
-      '已發FB': 'bg-blue-50 text-blue-700 border-blue-300',
-      '已發Threads': 'bg-purple-50 text-purple-700 border-purple-300',
-      '封存': 'bg-gray-100 text-gray-500 border-gray-200'
-    };
-
-    // Category Badge Color Map
-    const categoryColors = {
-      '重大爭議': 'bg-rose-50 text-rose-700 border-rose-200',
-      '薪資加班': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      '請假特休': 'bg-cyan-50 text-cyan-700 border-cyan-200',
-      '聘僱離職': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-      '職災安全': 'bg-amber-50 text-amber-700 border-amber-200',
-      '政策法遵': 'bg-sky-50 text-sky-700 border-sky-200'
-    };
-
-    // Update Top Metric Counters
-    function updateStats() {
-      document.getElementById('statTotal').textContent = ideas.length;
-      document.getElementById('statReady').textContent = ideas.filter(i => i.status === '可發布').length;
-      document.getElementById('statPublished').textContent = ideas.filter(i => i.status === '已發FB' || i.status === '已發Threads').length;
-      document.getElementById('statPending').textContent = ideas.filter(i => i.status === '待修改').length;
-    }
-
-    // Filter state
-    let currentCategory = 'ALL';
-    let currentStatus = 'ALL';
-    let currentSearch = '';
-
-    // Render Cards
+    // 渲染卡片
     function renderCards() {
-      const container = document.getElementById('cardsContainer');
+      const grid = document.getElementById('cardsGrid');
       const emptyState = document.getElementById('emptyState');
-      container.innerHTML = '';
 
       const filtered = ideas.filter(item => {
-        const matchCat = (currentCategory === 'ALL' || item.category === currentCategory);
-        const matchStatus = (currentStatus === 'ALL' || item.status === currentStatus);
-        const searchTarget = `${item.topic} ${item.law} ${item.summary} ${item.angle_a_hook} ${item.angle_a_content} ${item.angle_b_hook} ${item.angle_b_content}`.toLowerCase();
-        const matchSearch = (!currentSearch || searchTarget.includes(currentSearch.toLowerCase()));
-        return matchCat && matchStatus && matchSearch;
+        if (currentCategory !== 'ALL' && item.category !== currentCategory) return false;
+        if (currentStatus !== 'ALL' && item.status !== currentStatus) return false;
+        if (searchQuery.trim() !== '') {
+          const q = searchQuery.toLowerCase();
+          const matchTitle = (item.title || '').toLowerCase().includes(q);
+          const matchControversy = (item.controversy || '').toLowerCase().includes(q);
+          const matchAHook = (item.angleA?.hook || '').toLowerCase().includes(q);
+          const matchACore = (item.angleA?.core || '').toLowerCase().includes(q);
+          const matchBHook = (item.angleB?.hook || '').toLowerCase().includes(q);
+          const matchBCore = (item.angleB?.core || '').toLowerCase().includes(q);
+          if (!matchTitle && !matchControversy && !matchAHook && !matchACore && !matchBHook && !matchBCore) {
+            return false;
+          }
+        }
+        return true;
       });
 
       if (filtered.length === 0) {
+        grid.innerHTML = '';
         emptyState.classList.remove('hidden');
-      } else {
-        emptyState.classList.add('hidden');
+        return;
       }
 
-      // Sort newest date first
-      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      emptyState.classList.add('hidden');
 
-      filtered.forEach(item => {
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow flex flex-col p-4 sm:p-5 relative overflow-hidden group";
+      grid.innerHTML = filtered.map(item => {
+        let statusBadge = 'bg-slate-800 text-slate-300 border-slate-700';
+        if (item.status === '可發布') statusBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        else if (item.status === '待修改') statusBadge = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        else if (item.status === '已發FB') statusBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        else if (item.status === '已發Threads') statusBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/30';
 
-        const catColor = categoryColors[item.category] || 'bg-slate-50 text-slate-700 border-slate-200';
-        const stColor = statusColors[item.status] || 'bg-slate-50 text-slate-700 border-slate-200';
-
-        card.innerHTML = `
-          <!-- Top metadata row -->
-          <div class="flex items-center justify-between gap-2 mb-2.5">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-xs font-mono font-bold text-slate-500">${item.date}</span>
-              <span class="text-[11px] px-2 py-0.5 rounded-full font-bold border ${catColor}">
-                ${item.category}
-              </span>
-            </div>
-
-            <!-- Status selector -->
-            <select class="status-select text-[11px] font-bold px-2 py-1 rounded-lg border ${stColor} bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-brand-500" data-id="${item.id}">
-              <option value="待修改" ${item.status === '待修改' ? 'selected' : ''}>待修改</option>
-              <option value="可發布" ${item.status === '可發布' ? 'selected' : ''}>可發布</option>
-              <option value="已發FB" ${item.status === '已發FB' ? 'selected' : ''}>已發FB</option>
-              <option value="已發Threads" ${item.status === '已發Threads' ? 'selected' : ''}>已發Threads</option>
-              <option value="封存" ${item.status === '封存' ? 'selected' : ''}>封存</option>
-            </select>
-          </div>
-
-          <!-- Title -->
-          <h2 class="font-extrabold text-slate-900 text-sm sm:text-base leading-snug mb-2 group-hover:text-brand-700 transition-colors">
-            ${item.topic}
-          </h2>
-
-          <!-- Law & Summary -->
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 mb-3 text-xs space-y-1">
-            <div class="flex items-center gap-1 text-brand-700 font-bold">
-              <span>⚖️</span>
-              <span>${item.law}</span>
-            </div>
-            <p class="text-slate-600 leading-relaxed text-[11px]">${item.summary}</p>
-          </div>
-
-          <!-- Dual Angles Section -->
-          <div class="space-y-2.5 flex-1 mb-3">
-
-            <!-- Angle A: Employer/HR -->
-            <div class="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50/50 to-white p-3 text-xs relative group/a">
-              <div class="flex items-center justify-between gap-2 mb-1">
-                <span class="font-black text-brand-900 flex items-center gap-1">
-                  <span class="w-2 h-2 rounded-full bg-brand-600"></span>
-                  切角 A（${item.angle_a_aud || '老闆/人資避險'}）
+        return `
+          <article class="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-3xl p-5 shadow-lg flex flex-col justify-between transition-all duration-200">
+            <div>
+              <!-- 頂部 Meta 資訊 -->
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/80">
+                    ${item.category}
+                  </span>
+                  <span class="text-xs text-slate-500 font-mono">${item.date}</span>
+                </div>
+                
+                <span class="text-xs font-medium rounded-lg px-2.5 py-1 border ${statusBadge}">
+                  ${item.status}
                 </span>
-                <button class="copy-hook-a text-[11px] text-brand-600 hover:text-brand-800 font-semibold px-2 py-0.5 rounded bg-white border border-blue-200 hover:bg-blue-50 transition-colors shadow-2xs" data-id="${item.id}">
-                  複製 Hook
-                </button>
               </div>
-              <p class="font-bold text-slate-800 text-[12px] leading-relaxed mb-1">
-                「${item.angle_a_hook}」
-              </p>
-              <p class="text-slate-600 text-[11px] leading-relaxed">
-                ${item.angle_a_content}
-              </p>
-            </div>
 
-            <!-- Angle B: Employee/Threads -->
-            <div class="rounded-xl border border-amber-100 bg-gradient-to-br from-amber-50/50 to-white p-3 text-xs relative group/b">
-              <div class="flex items-center justify-between gap-2 mb-1">
-                <span class="font-black text-amber-900 flex items-center gap-1">
-                  <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                  切角 B（${item.angle_b_aud || '上班族/Threads'}）
-                </span>
-                <button class="copy-hook-b text-[11px] text-amber-700 hover:text-amber-900 font-semibold px-2 py-0.5 rounded bg-white border border-amber-200 hover:bg-amber-50 transition-colors shadow-2xs" data-id="${item.id}">
-                  複製 Hook
-                </button>
+              <!-- 議題標題 -->
+              <h2 class="text-base sm:text-lg font-bold text-white mb-2 leading-snug hover:text-amber-400 transition">
+                ${item.title}
+              </h2>
+
+              <!-- 時事與爭點全文 -->
+              ${item.controversy ? `
+                <div class="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3 mb-4 space-y-1">
+                  <div class="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
+                    <span>⚖️</span>
+                    <span>時事與法令爭點</span>
+                  </div>
+                  <p class="text-xs text-slate-300 leading-relaxed">${item.controversy}</p>
+                </div>
+              ` : ''}
+
+              <!-- 雙切角靈感區 -->
+              <div class="space-y-3 mb-4">
+                <!-- 切角 A (老闆/人資) -->
+                <div class="bg-blue-950/30 border border-blue-900/40 rounded-2xl p-3.5 relative group">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[11px] font-bold text-blue-400 flex items-center gap-1">
+                      <span>🛡️</span> 切角 A：${item.angleA?.audience || '老闆/人資避險'}
+                    </span>
+                    <button onclick="copyText('${escapeQuotes(item.angleA?.hook || '')}', '已複製切角 A 破題 Hook！')" class="text-[10px] text-blue-300 hover:text-white bg-blue-900/60 hover:bg-blue-800 px-2 py-0.5 rounded-md transition">
+                      複製 Hook
+                    </button>
+                  </div>
+                  <div class="text-xs font-semibold text-blue-100 mb-1 leading-snug">
+                    ${item.angleA?.hook || ''}
+                  </div>
+                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2">
+                    ${item.angleA?.core || ''}
+                  </div>
+                  ${item.angleA?.defense ? `
+                    <div class="text-[11px] text-emerald-400/90 bg-slate-950/60 p-2 rounded-xl mb-1.5 border border-slate-800/50">
+                      <span class="font-bold">🛡️ 防禦SOP：</span>${item.angleA?.defense}
+                    </div>
+                  ` : ''}
+                  ${item.angleA?.cta ? `
+                    <div class="text-[11px] text-slate-400">
+                      <span class="text-slate-500 font-semibold">📣 互動CTA：</span>${item.angleA?.cta}
+                    </div>
+                  ` : ''}
+                </div>
+
+                <!-- 切角 B (上班族/Threads) -->
+                <div class="bg-amber-950/30 border border-amber-900/40 rounded-2xl p-3.5 relative group">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[11px] font-bold text-amber-400 flex items-center gap-1">
+                      <span>🔥</span> 切角 B：${item.angleB?.audience || '上班族/Threads熱議'}
+                    </span>
+                    <button onclick="copyText('${escapeQuotes(item.angleB?.hook || '')}', '已複製切角 B 破題 Hook！')" class="text-[10px] text-amber-300 hover:text-white bg-amber-900/60 hover:bg-amber-800 px-2 py-0.5 rounded-md transition">
+                      複製 Hook
+                    </button>
+                  </div>
+                  <div class="text-xs font-semibold text-amber-100 mb-1 leading-snug">
+                    ${item.angleB?.hook || ''}
+                  </div>
+                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2">
+                    ${item.angleB?.core || ''}
+                  </div>
+                  ${item.angleB?.defense ? `
+                    <div class="text-[11px] text-amber-300/90 bg-slate-950/60 p-2 rounded-xl mb-1.5 border border-slate-800/50">
+                      <span class="font-bold">🛡️ 自保SOP：</span>${item.angleB?.defense}
+                    </div>
+                  ` : ''}
+                  ${item.angleB?.cta ? `
+                    <div class="text-[11px] text-slate-400">
+                      <span class="text-slate-500 font-semibold">📣 互動CTA：</span>${item.angleB?.cta}
+                    </div>
+                  ` : ''}
+                </div>
               </div>
-              <p class="font-bold text-slate-800 text-[12px] leading-relaxed mb-1">
-                「${item.angle_b_hook}」
-              </p>
-              <p class="text-slate-600 text-[11px] leading-relaxed">
-                ${item.angle_b_content}
-              </p>
+
+              <!-- 備註 -->
+              ${item.note ? `
+                <div class="text-[11px] text-slate-400 mb-4 flex items-center gap-1">
+                  <span class="text-slate-500">📝 筆記：</span>
+                  <span>${item.note}</span>
+                </div>
+              ` : ''}
             </div>
 
-          </div>
+            <!-- 卡片底部動作列 -->
+            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <span class="text-[11px] text-slate-500 font-mono">ID: ${item.id}</span>
 
-          <!-- Notes if any -->
-          ${item.notes ? `
-          <div class="text-[11px] text-amber-800 bg-amber-50/60 border border-amber-200/50 px-2.5 py-1.5 rounded-lg mb-3 flex items-center gap-1">
-            <span>📝</span>
-            <span class="truncate">${item.notes}</span>
-          </div>` : ''}
-
-          <!-- Footer Action Bar -->
-          <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto text-xs">
-            <div class="flex items-center gap-1">
-              <button class="edit-btn p-1.5 text-slate-400 hover:text-brand-700 hover:bg-slate-100 rounded-lg transition-colors" data-id="${item.id}" title="編輯內容">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-              </button>
-              <button class="delete-btn p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" data-id="${item.id}" title="刪除靈感">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              <button onclick="copyFullTopic('${item.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold border border-slate-700 transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                一鍵全選複製
               </button>
             </div>
-
-            <button class="copy-all-btn inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-brand-800 text-white font-bold text-xs transition-colors shadow-sm" data-id="${item.id}">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-              一鍵全選複製
-            </button>
-          </div>
+          </article>
         `;
-
-        container.appendChild(card);
-      });
-
-      attachCardListeners();
+      }).join('');
     }
 
-    function attachCardListeners() {
-      document.querySelectorAll('.status-select').forEach(sel => {
-        sel.addEventListener('change', (e) => {
-          const id = parseInt(e.target.dataset.id);
-          const item = ideas.find(i => i.id === id);
-          if (item) {
-            item.status = e.target.value;
-            saveIdeas();
-            showToast(`已將狀態變更為「${item.status}」`);
-          }
-        });
-      });
-
-      document.querySelectorAll('.copy-hook-a').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const id = parseInt(e.currentTarget.dataset.id);
-          const item = ideas.find(i => i.id === id);
-          if (item) copyText(item.angle_a_hook, '已複製 切角 A 破題 Hook！');
-        });
-      });
-
-      document.querySelectorAll('.copy-hook-b').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const id = parseInt(e.currentTarget.dataset.id);
-          const item = ideas.find(i => i.id === id);
-          if (item) copyText(item.angle_b_hook, '已複製 切角 B 破題 Hook！');
-        });
-      });
-
-      document.querySelectorAll('.copy-all-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const id = parseInt(e.currentTarget.dataset.id);
-          const item = ideas.find(i => i.id === id);
-          if (item) {
-            const formatted = `【${item.topic}】\n` +
-              `📅 日期：${item.date}｜分類：${item.category}\n` +
-              `⚖️ 核心法規：${item.law}\n` +
-              `📌 爭點摘要：${item.summary}\n\n` +
-              `👉 切角 A（${item.angle_a_aud}）：\n` +
-              `【Hook】${item.angle_a_hook}\n` +
-              `【觀點】${item.angle_a_content}\n\n` +
-              `👉 切角 B（${item.angle_b_aud}）：\n` +
-              `【Hook】${item.angle_b_hook}\n` +
-              `【觀點】${item.angle_b_content}`;
-            copyText(formatted, '已複製完整發想內容！');
-          }
-        });
-      });
-
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const id = parseInt(e.currentTarget.dataset.id);
-          openEditModal(id);
-        });
-      });
-
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const id = parseInt(e.currentTarget.dataset.id);
-          deleteIdea(id);
-        });
-      });
+    // 篩選與搜尋
+    function handleCategoryFilter(cat) {
+      currentCategory = cat;
+      renderCategoryPills();
+      renderCards();
     }
 
-    // Modal Control
-    const modal = document.getElementById('ideaModal');
-    const form = document.getElementById('ideaForm');
-
-    function openAddModal() {
-      document.getElementById('modalTitle').textContent = '新增發想靈感';
-      form.reset();
-      document.getElementById('editId').value = '';
-      document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('formStatus').value = '可發布';
-      modal.classList.remove('hidden');
+    function handleStatusFilter(status) {
+      currentStatus = status;
+      renderCards();
     }
 
-    function openEditModal(id) {
-      const item = ideas.find(i => i.id === id);
+    function handleSearch(val) {
+      searchQuery = val;
+      renderCards();
+    }
+
+    function clearFilters() {
+      searchQuery = '';
+      currentCategory = 'ALL';
+      currentStatus = 'ALL';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = 'ALL';
+      handleCategoryFilter('ALL');
+    }
+
+    // 一鍵全選複製整則議題
+    function copyFullTopic(id) {
+      const item = ideas.find(i => String(i.id) === String(id));
       if (!item) return;
-      document.getElementById('modalTitle').textContent = '編輯發想靈感';
-      document.getElementById('editId').value = item.id;
-      document.getElementById('formDate').value = item.date;
-      document.getElementById('formCategory').value = item.category;
-      document.getElementById('formStatus').value = item.status;
-      document.getElementById('formTopic').value = item.topic;
-      document.getElementById('formLaw').value = item.law;
-      document.getElementById('formSummary').value = item.summary;
-      document.getElementById('formAngleAAud').value = item.angle_a_aud;
-      document.getElementById('formAngleAHook').value = item.angle_a_hook;
-      document.getElementById('formAngleAContent').value = item.angle_a_content;
-      document.getElementById('formAngleBAud').value = item.angle_b_aud;
-      document.getElementById('formAngleBHook').value = item.angle_b_hook;
-      document.getElementById('formAngleBContent').value = item.angle_b_content;
-      document.getElementById('formNotes').value = item.notes || '';
-      modal.classList.remove('hidden');
+
+      const fullText = `【${item.title}】
+📅 日期：${item.date}｜分類：${item.category}
+⚖️ 時事爭點：${item.controversy || '無'}
+
+---
+🛡️【切角 A：${item.angleA?.audience || '老闆/人資避險'}】
+破題：${item.angleA?.hook || ''}
+觀點：${item.angleA?.core || ''}
+SOP：${item.angleA?.defense || ''}
+CTA：${item.angleA?.cta || ''}
+
+🔥【切角 B：${item.angleB?.audience || '上班族/Threads熱議'}】
+破題：${item.angleB?.hook || ''}
+觀點：${item.angleB?.core || ''}
+SOP：${item.angleB?.defense || ''}
+CTA：${item.angleB?.cta || ''}
+---
+📝 備註：${item.note || '無'}
+（來自：磊伯勞資充電站 ⚡ 社群發想靈感庫）`;
+
+      copyText(fullText, '已複製整則靈感文案到剪貼簿！');
     }
 
-    function closeModal() {
-      modal.classList.add('hidden');
-    }
-
-    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-    document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
-    document.getElementById('addIdeaBtn').addEventListener('click', openAddModal);
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const editId = document.getElementById('editId').value;
-      const payload = {
-        date: document.getElementById('formDate').value,
-        category: document.getElementById('formCategory').value,
-        status: document.getElementById('formStatus').value,
-        topic: document.getElementById('formTopic').value,
-        law: document.getElementById('formLaw').value,
-        summary: document.getElementById('formSummary').value,
-        angle_a_aud: document.getElementById('formAngleAAud').value || '老闆/人資避險',
-        angle_a_hook: document.getElementById('formAngleAHook').value,
-        angle_a_content: document.getElementById('formAngleAContent').value,
-        angle_b_aud: document.getElementById('formAngleBAud').value || '上班族/Threads',
-        angle_b_hook: document.getElementById('formAngleBHook').value,
-        angle_b_content: document.getElementById('formAngleBContent').value,
-        notes: document.getElementById('formNotes').value
-      };
-
-      if (editId) {
-        const id = parseInt(editId);
-        const idx = ideas.findIndex(i => i.id === id);
-        if (idx !== -1) {
-          ideas[idx] = { ...ideas[idx], ...payload };
-          showToast('靈感已成功更新！');
-        }
-      } else {
-        const newId = ideas.length > 0 ? Math.max(...ideas.map(i => i.id)) + 1 : 1;
-        ideas.unshift({ id: newId, ...payload });
-        showToast('已新增一則新靈感！');
+    function copyText(text, msg) {
+      if (!navigator.clipboard) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast(msg || '已複製至剪貼簿！');
+        return;
       }
-
-      saveIdeas();
-      closeModal();
-    });
-
-    function deleteIdea(id) {
-      const idx = ideas.findIndex(i => i.id === id);
-      if (idx !== -1) {
-        ideas.splice(idx, 1);
-        saveIdeas();
-        showToast('已移除該則靈感');
-      }
-    }
-
-    // Category Pill Filters
-    document.querySelectorAll('.cat-pill').forEach(pill => {
-      pill.addEventListener('click', (e) => {
-        document.querySelectorAll('.cat-pill').forEach(p => {
-          p.classList.remove('bg-brand-900', 'text-white', 'font-bold');
-          p.classList.add('bg-slate-100', 'text-slate-600', 'font-medium');
-        });
-        e.currentTarget.classList.remove('bg-slate-100', 'text-slate-600', 'font-medium');
-        e.currentTarget.classList.add('bg-brand-900', 'text-white', 'font-bold');
-
-        currentCategory = e.currentTarget.dataset.cat;
-        renderCards();
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(msg || '已複製至剪貼簿！');
+      }).catch(() => {
+        showToast('複製失敗，請手動複製');
       });
-    });
+    }
 
-    // Status Filter
-    document.getElementById('statusFilter').addEventListener('change', (e) => {
-      currentStatus = e.target.value;
-      renderCards();
-    });
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-[-120%]', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
 
-    // Search Input
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      currentSearch = e.target.value.trim();
-      renderCards();
-    });
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-[-120%]', 'opacity-0');
+      }, 2400);
+    }
 
-    // Export JSON backup
-    document.getElementById('exportJsonBtn').addEventListener('click', () => {
+    function escapeQuotes(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+    }
+
+    function exportJSONBackup() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(ideas, null, 2));
       const downloadAnchor = document.createElement('a');
+      const today = new Date().toISOString().split('T')[0];
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `leibo_ideas_backup_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `leibo_ideas_sheet_${today}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      showToast('已下載 JSON 備份檔！');
-    });
-
-    // Reset Data
-    document.getElementById('resetDataBtn').addEventListener('click', () => {
-      ideas = [...defaultData];
-      saveIdeas();
-      showToast('已恢復預設靈感資料庫');
-    });
-
-    // Initial render
-    updateStats();
-    renderCards();
+      showToast('已成功下載試算表備份 JSON！');
+    }
   </script>
 </body>
 </html>
