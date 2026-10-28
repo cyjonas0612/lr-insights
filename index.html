@@ -69,19 +69,16 @@
 
       <!-- 操作按鈕群 -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <!-- 開啟試算表按鈕 -->
         <a href="https://docs.google.com/spreadsheets/d/1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc/edit" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-900/30 border border-emerald-400/40 transition flex-shrink-0">
           <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H6v-2h3v2zm0-4H6v-2h3v2zm0-4H6V7h3v2zm10 8h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V7h8v2z"/></svg>
           <span>開啟試算表</span>
         </a>
 
-        <!-- 同步試算表按鈕 -->
         <button onclick="fetchSheetData(true)" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 text-xs font-semibold shadow-sm transition" title="重新自試算表抓取最新資料">
           <svg id="syncIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           <span class="hidden sm:inline">同步更新</span>
         </button>
 
-        <!-- 備份 JSON 按鈕 -->
         <button onclick="exportJSONBackup()" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition" title="備份 JSON">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           <span>備份</span>
@@ -123,7 +120,7 @@
       </div>
     </section>
 
-    <!-- Toolbar & Filters (大漏斗 + 精準文章選取器) -->
+    <!-- Toolbar & Filters -->
     <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 mb-6 shadow-sm space-y-3.5">
       <!-- 指定文章下拉選單 -->
       <div class="bg-slate-950/80 border border-amber-500/30 rounded-xl p-2.5 sm:p-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
@@ -198,7 +195,7 @@
   <script>
     const SPREADSHEET_ID = '1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc';
     const SHEET_NAME = '社群發想靈感庫';
-    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v7';
+    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v8';
 
     // 磊伯專屬寫文對話網址
     const SPARK_CHAT_URL = 'https://gemini.google.com/app/396a6770419a0d8e?hl=zh-TW';
@@ -538,7 +535,7 @@
                   <!-- 專屬喚醒 Spark 按鈕 (切角 A) -->
                   <div class="pt-2 border-t border-blue-900/40 flex justify-end">
                     <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_A')" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-900/40 transition">
-                      <span>⚡ 帶入Spark寫FB長文</span>
+                      <span>⚡ 帶入Spark寫FB貼文</span>
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </button>
                   </div>
@@ -610,51 +607,42 @@
       }).join('');
     }
 
-    // 核心動作：打包 Prompt 並喚醒 Chrome 前往專屬對話
+    // 解耦架構：僅打包純素材與指定平台，格式全交由 Skill 大腦發揮
     function launchSparkPrompt(id, angleType) {
       const item = ideas.find(i => String(i.id) === String(id));
       if (!item) return;
 
       const isAngleA = angleType === 'ANGLE_A';
-      const platformName = isAngleA ? 'Facebook 專業長文' : 'Threads 爆款串文';
+      const platformName = isAngleA ? 'Facebook 專業貼文' : 'Threads 爆款串文';
       const targetAngle = isAngleA ? item.angleA : item.angleB;
 
-      // 專屬擴寫觸發指令
-      const promptText = `請使用你學習過的「磊伯」個人專屬風格與寫作Skill，將以下素材擴寫為一篇【${platformName}】：
+      const promptText = `請依據「leibo-copywriter」規格，將以下素材擴寫為文案：
 
+【發布平台】：${platformName}
 【主題名稱】：${item.title}
-【時事與爭點】：${item.controversy || '請依主題自由延伸實務常見勞資爭端'}
+【時事與爭點】：${item.controversy || '依主題延伸常見實務爭議'}
 【指定破題 Hook】：${targetAngle?.hook || ''}
 【核心觀點】：${targetAngle?.core || ''}
 【防禦 SOP】：${targetAngle?.defense || ''}
-【互動 CTA】：${targetAngle?.cta || ''}
-
-【核心排版與風格要求】：
-1. 嚴格落實「標點符號即斷行」原則，每句話在逗號、句號、問號處直接換行，每行單獨成句，絕不堆疊大段落。
-2. 中文與英文或數字緊密相連，不加空格。
-3. 語氣兼具專業顧問避險思維與白話痛點共鳴。
-4. 結構：震撼破題 -> 時事爭議爆點 -> 勞動法規地雷拆解 -> 磊伯實務合規 SOP -> 結尾金句與留言互動。`;
+【互動 CTA】：${targetAngle?.cta || ''}`;
 
       // 1. 寫入剪貼簿
-      copyText(promptText, `已複製【${item.title}】擴寫指令！即將前往 Spark 專屬對話...`);
+      copyText(promptText, `已複製【${item.title}】純素材！前往專屬對話...`);
 
-      // 2. 強制跳出 LINE 開啟外部 Chrome 瀏覽器
+      // 2. 強制跳出 LINE 開啟外部 Chrome
       setTimeout(() => {
         const ua = navigator.userAgent || '';
         const isLine = ua.includes('Line') || ua.includes('LINE');
         const isAndroid = ua.includes('Android');
 
         if (isAndroid && isLine) {
-          // Android + LINE 環境：使用 Chrome Intent 強制喚醒獨立 Chrome
           const cleanUrl = SPARK_CHAT_URL.replace('https://', '');
           const intentUrl = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end`;
           window.location.href = intentUrl;
         } else if (isLine) {
-          // iOS 或其他 LINE 環境：加上 openExternalBrowser 參數
           const delimiter = SPARK_CHAT_URL.includes('?') ? '&' : '?';
           window.location.href = `${SPARK_CHAT_URL}${delimiter}openExternalBrowser=1`;
         } else {
-          // 一般瀏覽器直接開新分頁
           window.open(SPARK_CHAT_URL, '_blank');
         }
       }, 600);
