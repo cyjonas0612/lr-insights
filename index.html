@@ -195,7 +195,7 @@
   <script>
     const SPREADSHEET_ID = '1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc';
     const SHEET_NAME = '社群發想靈感庫';
-    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v8';
+    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v9';
 
     // 磊伯專屬寫文對話網址
     const SPARK_CHAT_URL = 'https://gemini.google.com/app/396a6770419a0d8e?hl=zh-TW';
@@ -532,10 +532,14 @@
                     </div>
                   ` : ''}
 
-                  <!-- 專屬喚醒 Spark 按鈕 (切角 A) -->
-                  <div class="pt-2 border-t border-blue-900/40 flex justify-end">
-                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_A')" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-900/40 transition">
-                      <span>⚡ 帶入Spark寫FB貼文</span>
+                  <!-- 雙平台擴寫按鈕 (切角 A) -->
+                  <div class="pt-2 border-t border-blue-900/40 flex flex-wrap items-center justify-end gap-2">
+                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_A', 'FB')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-900/40 transition">
+                      <span>⚡ 寫FB貼文</span>
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </button>
+                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_A', 'THREADS')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-blue-500/40 text-xs font-bold transition">
+                      <span>⚡ 寫Threads短文</span>
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </button>
                   </div>
@@ -568,10 +572,14 @@
                     </div>
                   ` : ''}
 
-                  <!-- 專屬喚醒 Spark 按鈕 (切角 B) -->
-                  <div class="pt-2 border-t border-amber-900/40 flex justify-end">
-                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_B')" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold shadow-md shadow-amber-900/30 transition">
-                      <span>⚡ 帶入Spark寫Threads串文</span>
+                  <!-- 雙平台擴寫按鈕 (切角 B) -->
+                  <div class="pt-2 border-t border-amber-900/40 flex flex-wrap items-center justify-end gap-2">
+                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_B', 'FB')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold transition">
+                      <span>⚡ 寫FB貼文</span>
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </button>
+                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_B', 'THREADS')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-md shadow-amber-900/30 transition">
+                      <span>⚡ 寫Threads短文</span>
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </button>
                   </div>
@@ -607,14 +615,14 @@
       }).join('');
     }
 
-    // 解耦架構：僅打包純素材與指定平台，格式全交由 Skill 大腦發揮
-    function launchSparkPrompt(id, angleType) {
+    // 解耦架構：傳遞純素材與目標平台
+    function launchSparkPrompt(id, angleType, platformType) {
       const item = ideas.find(i => String(i.id) === String(id));
       if (!item) return;
 
       const isAngleA = angleType === 'ANGLE_A';
-      const platformName = isAngleA ? 'Facebook 專業貼文' : 'Threads 爆款串文';
       const targetAngle = isAngleA ? item.angleA : item.angleB;
+      const platformName = platformType === 'FB' ? 'Facebook 專業貼文' : 'Threads 爆款串文';
 
       const promptText = `請依據「leibo-copywriter」規格，將以下素材擴寫為文案：
 
@@ -626,10 +634,8 @@
 【防禦 SOP】：${targetAngle?.defense || ''}
 【互動 CTA】：${targetAngle?.cta || ''}`;
 
-      // 1. 寫入剪貼簿
-      copyText(promptText, `已複製【${item.title}】純素材！前往專屬對話...`);
+      copyText(promptText, `已複製【${item.title}】素材！前往專屬對話...`);
 
-      // 2. 強制跳出 LINE 開啟外部 Chrome
       setTimeout(() => {
         const ua = navigator.userAgent || '';
         const isLine = ua.includes('Line') || ua.includes('LINE');
