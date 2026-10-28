@@ -69,7 +69,7 @@
 
       <!-- 操作按鈕群 -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <!-- 開啟試算表按鈕（直接進試算表編輯） -->
+        <!-- 開啟試算表按鈕 -->
         <a href="https://docs.google.com/spreadsheets/d/1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc/edit" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-900/30 border border-emerald-400/40 transition flex-shrink-0">
           <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H6v-2h3v2zm0-4H6v-2h3v2zm0-4H6V7h3v2zm10 8h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V7h8v2z"/></svg>
           <span>開啟試算表</span>
@@ -92,7 +92,7 @@
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-5">
     <!-- Metric Dashboard (KPI 數據看板) -->
-    <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+    <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5">
       <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm">
         <span class="text-xs text-slate-400 font-medium">總靈感庫存</span>
         <div class="mt-1 flex items-baseline justify-between">
@@ -123,18 +123,38 @@
       </div>
     </section>
 
-    <!-- Toolbar & Filters -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 mb-6 shadow-sm space-y-3">
+    <!-- Toolbar & Filters (大漏斗 + 精準文章選取器) -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 mb-6 shadow-sm space-y-3.5">
+      <!-- 精準取用器：文章專屬快速選取下拉選單 -->
+      <div class="bg-slate-950/80 border border-amber-500/30 rounded-xl p-2.5 sm:p-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <div class="flex items-center gap-1.5 text-xs font-bold text-amber-400 flex-shrink-0">
+          <span>🎯</span>
+          <span>指定文章：</span>
+        </div>
+        <div class="relative flex-1">
+          <select id="articleSelect" onchange="handleArticleSelect(this.value)" class="w-full bg-slate-900 border border-slate-700/80 text-xs sm:text-sm text-slate-100 rounded-lg px-3 py-2 focus:outline-none focus:border-amber-400 transition font-medium">
+            <option value="ALL">📋 顯示當前全部文章清單</option>
+          </select>
+        </div>
+        <div class="flex items-center justify-between sm:justify-end gap-2 flex-shrink-0">
+          <button id="resetFocusBtn" onclick="resetFocusMode()" class="hidden text-xs text-slate-400 hover:text-white px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
+            返回全部列表
+          </button>
+          <span id="articleCountBadge" class="text-[11px] text-slate-400 font-mono px-2 py-1 rounded bg-slate-900 border border-slate-800">
+            共 0 則
+          </span>
+        </div>
+      </div>
+
+      <!-- 漏斗第一層：搜尋與狀態篩選 -->
       <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-        <!-- 搜尋列 -->
         <div class="relative flex-1">
           <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="搜尋議題標題、爭點、切角 Hook、觀點或防禦SOP..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="搜尋議題標題、爭點、切角 Hook、觀點或防禦SOP..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
         </div>
         
-        <!-- 狀態篩選與同步時間 -->
         <div class="flex items-center gap-2">
-          <select id="statusFilter" onchange="handleStatusFilter(this.value)" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm text-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500 transition">
+          <select id="statusFilter" onchange="handleStatusFilter(this.value)" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm text-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 transition">
             <option value="ALL">全部狀態</option>
             <option value="可發布">可發布</option>
             <option value="待修改">待修改</option>
@@ -146,7 +166,7 @@
         </div>
       </div>
 
-      <!-- 分類標籤滑動列 -->
+      <!-- 漏斗第二層：分類標籤滑動列 -->
       <div id="categoryPills" class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-0.5">
         <button onclick="handleCategoryFilter('ALL')" data-cat="ALL" class="cat-pill active px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition bg-amber-500 border-amber-500 text-slate-950 shadow-sm">
           全部議題
@@ -178,15 +198,15 @@
   <script>
     const SPREADSHEET_ID = '1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc';
     const SHEET_NAME = '社群發想靈感庫';
-    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v5';
+    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v6';
 
     let ideas = [];
     let currentCategory = 'ALL';
     let currentStatus = 'ALL';
     let searchQuery = '';
+    let selectedArticleId = 'ALL'; // 方案 A：當前選中的特定文章 ID
 
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. 本機快取秒開
       const cached = localStorage.getItem(STORAGE_KEY);
       if (cached) {
         try {
@@ -202,7 +222,6 @@
         }
       }
 
-      // 2. 自動連線讀取 Google 試算表最新內容
       fetchSheetData(ideas.length === 0);
     });
 
@@ -227,7 +246,6 @@
             return;
           }
 
-          // 對應試算表欄位 A ~ Q
           ideas = rows.map((row, index) => {
             const getVal = (colIndex) => {
               if (!row.c || !row.c[colIndex]) return '';
@@ -320,9 +338,31 @@
       }
     }
 
+    // 核心資料漏斗過濾計算
+    function getFilteredIdeas() {
+      return ideas.filter(item => {
+        if (currentCategory !== 'ALL' && item.category !== currentCategory) return false;
+        if (currentStatus !== 'ALL' && item.status !== currentStatus) return false;
+        if (searchQuery.trim() !== '') {
+          const q = searchQuery.toLowerCase();
+          const matchTitle = (item.title || '').toLowerCase().includes(q);
+          const matchControversy = (item.controversy || '').toLowerCase().includes(q);
+          const matchAHook = (item.angleA?.hook || '').toLowerCase().includes(q);
+          const matchACore = (item.angleA?.core || '').toLowerCase().includes(q);
+          const matchBHook = (item.angleB?.hook || '').toLowerCase().includes(q);
+          const matchBCore = (item.angleB?.core || '').toLowerCase().includes(q);
+          if (!matchTitle && !matchControversy && !matchAHook && !matchACore && !matchBHook && !matchBCore) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
     function renderAll() {
       renderMetrics();
       renderCategoryPills();
+      updateArticleDropdown();
       renderCards();
     }
 
@@ -356,29 +396,37 @@
       }).join('');
     }
 
+    // 更新「文章快速選取下拉選單」的選項（與篩選器完全連動）
+    function updateArticleDropdown() {
+      const dropdown = document.getElementById('articleSelect');
+      const countBadge = document.getElementById('articleCountBadge');
+      const resetBtn = document.getElementById('resetFocusBtn');
+      const pool = getFilteredIdeas();
+
+      countBadge.textContent = `共 ${pool.length} 則`;
+
+      // 檢查若選中的 ID 不在過濾後的清單中，自動復原為 ALL
+      if (selectedArticleId !== 'ALL' && !pool.some(i => String(i.id) === String(selectedArticleId))) {
+        selectedArticleId = 'ALL';
+      }
+
+      resetBtn.classList.toggle('hidden', selectedArticleId === 'ALL');
+
+      let optionsHtml = `<option value="ALL">📋 顯示當前全部文章清單 (${pool.length}則)</option>`;
+      pool.forEach(item => {
+        const isSelected = String(item.id) === String(selectedArticleId);
+        optionsHtml += `<option value="${item.id}" ${isSelected ? 'selected' : ''}>[${item.date}] ${item.title}</option>`;
+      });
+
+      dropdown.innerHTML = optionsHtml;
+    }
+
     function renderCards() {
       const grid = document.getElementById('cardsGrid');
       const emptyState = document.getElementById('emptyState');
+      const pool = getFilteredIdeas();
 
-      const filtered = ideas.filter(item => {
-        if (currentCategory !== 'ALL' && item.category !== currentCategory) return false;
-        if (currentStatus !== 'ALL' && item.status !== currentStatus) return false;
-        if (searchQuery.trim() !== '') {
-          const q = searchQuery.toLowerCase();
-          const matchTitle = (item.title || '').toLowerCase().includes(q);
-          const matchControversy = (item.controversy || '').toLowerCase().includes(q);
-          const matchAHook = (item.angleA?.hook || '').toLowerCase().includes(q);
-          const matchACore = (item.angleA?.core || '').toLowerCase().includes(q);
-          const matchBHook = (item.angleB?.hook || '').toLowerCase().includes(q);
-          const matchBCore = (item.angleB?.core || '').toLowerCase().includes(q);
-          if (!matchTitle && !matchControversy && !matchAHook && !matchACore && !matchBHook && !matchBCore) {
-            return false;
-          }
-        }
-        return true;
-      });
-
-      if (filtered.length === 0) {
+      if (pool.length === 0) {
         grid.innerHTML = '';
         emptyState.classList.remove('hidden');
         return;
@@ -386,16 +434,51 @@
 
       emptyState.classList.add('hidden');
 
-      grid.innerHTML = filtered.map(item => {
+      // 判斷是否處於單篇專注模式
+      const isFocusMode = selectedArticleId !== 'ALL';
+      let displayItems = pool;
+
+      if (isFocusMode) {
+        const focusItem = pool.find(i => String(i.id) === String(selectedArticleId));
+        displayItems = focusItem ? [focusItem] : pool;
+        grid.className = "grid grid-cols-1 gap-5 max-w-3xl mx-auto"; // 單篇專注時版面置中放大
+      } else {
+        grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-5";
+      }
+
+      grid.innerHTML = displayItems.map((item, idx) => {
         let statusBadge = 'bg-slate-800 text-slate-300 border-slate-700';
         if (item.status === '可發布') statusBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
         else if (item.status === '待修改') statusBadge = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
         else if (item.status === '已發FB') statusBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
         else if (item.status === '已發Threads') statusBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/30';
 
+        // 專注模式下的前一篇/下一篇邏輯
+        let focusNavHtml = '';
+        if (isFocusMode) {
+          const currentIndex = pool.findIndex(i => String(i.id) === String(item.id));
+          const prevItem = currentIndex > 0 ? pool[currentIndex - 1] : null;
+          const nextItem = currentIndex < pool.length - 1 ? pool[currentIndex + 1] : null;
+
+          focusNavHtml = `
+            <div class="mb-4 pb-3 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400">
+              <button onclick="handleArticleSelect('${prevItem ? prevItem.id : ''}')" ${!prevItem ? 'disabled' : ''} class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition flex items-center gap-1 text-slate-200">
+                ← 上一篇
+              </button>
+              <span class="font-mono text-amber-400 font-semibold">第 ${currentIndex + 1} / ${pool.length} 篇</span>
+              <button onclick="handleArticleSelect('${nextItem ? nextItem.id : ''}')" ${!nextItem ? 'disabled' : ''} class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition flex items-center gap-1 text-slate-200">
+                下一篇 →
+              </button>
+            </div>
+          `;
+        }
+
         return `
-          <article class="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-3xl p-5 shadow-lg flex flex-col justify-between transition-all duration-200">
+          <article class="bg-slate-900 border ${isFocusMode ? 'border-amber-500/50 shadow-2xl shadow-amber-500/5' : 'border-slate-800 hover:border-slate-700'} rounded-3xl p-5 sm:p-6 shadow-lg flex flex-col justify-between transition-all duration-200">
             <div>
+              ${focusNavHtml}
+
+              <!-- 頂部 Meta 資訊 -->
               <div class="flex items-center justify-between gap-2 mb-3">
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/80">
@@ -409,10 +492,12 @@
                 </span>
               </div>
 
-              <h2 class="text-base sm:text-lg font-bold text-white mb-2 leading-snug hover:text-amber-400 transition">
+              <!-- 議題標題 -->
+              <h2 class="text-base sm:text-xl font-bold text-white mb-2 leading-snug hover:text-amber-400 transition">
                 ${item.title}
               </h2>
 
+              <!-- 時事與法令爭點全文 -->
               ${item.controversy ? `
                 <div class="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3 mb-4 space-y-1">
                   <div class="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
@@ -423,25 +508,26 @@
                 </div>
               ` : ''}
 
-              <div class="space-y-3 mb-4">
+              <!-- 雙切角靈感區 -->
+              <div class="space-y-3.5 mb-4">
                 <!-- 切角 A (老闆/人資避險) -->
-                <div class="bg-blue-950/30 border border-blue-900/40 rounded-2xl p-3.5 relative group">
+                <div class="bg-blue-950/30 border border-blue-900/40 rounded-2xl p-3.5 sm:p-4 relative group">
                   <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[11px] font-bold text-blue-400 flex items-center gap-1">
                       <span>🛡️</span> 切角 A：${item.angleA?.audience || '老闆/人資避險'}
                     </span>
-                    <button onclick="copyText('${escapeQuotes(item.angleA?.hook || '')}', '已複製切角 A 破題 Hook！')" class="text-[10px] text-blue-300 hover:text-white bg-blue-900/60 hover:bg-blue-800 px-2 py-0.5 rounded-md transition">
+                    <button onclick="copyText('${escapeQuotes(item.angleA?.hook || '')}', '已複製切角 A 破題 Hook！')" class="text-[10px] text-blue-300 hover:text-white bg-blue-900/60 hover:bg-blue-800 px-2.5 py-1 rounded-md transition font-medium">
                       複製 Hook
                     </button>
                   </div>
-                  <div class="text-xs font-semibold text-blue-100 mb-1 leading-snug">
+                  <div class="text-xs sm:text-sm font-semibold text-blue-100 mb-1 leading-snug">
                     ${item.angleA?.hook || ''}
                   </div>
-                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2">
+                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2.5">
                     ${item.angleA?.core || ''}
                   </div>
                   ${item.angleA?.defense ? `
-                    <div class="text-[11px] text-emerald-400/90 bg-slate-950/60 p-2 rounded-xl mb-1.5 border border-slate-800/50">
+                    <div class="text-[11px] text-emerald-400/90 bg-slate-950/60 p-2.5 rounded-xl mb-1.5 border border-slate-800/50 leading-relaxed">
                       <span class="font-bold">🛡️ 防禦SOP：</span>${item.angleA?.defense}
                     </div>
                   ` : ''}
@@ -453,23 +539,23 @@
                 </div>
 
                 <!-- 切角 B (上班族/Threads熱議) -->
-                <div class="bg-amber-950/30 border border-amber-900/40 rounded-2xl p-3.5 relative group">
+                <div class="bg-amber-950/30 border border-amber-900/40 rounded-2xl p-3.5 sm:p-4 relative group">
                   <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[11px] font-bold text-amber-400 flex items-center gap-1">
                       <span>🔥</span> 切角 B：${item.angleB?.audience || '上班族/Threads熱議'}
                     </span>
-                    <button onclick="copyText('${escapeQuotes(item.angleB?.hook || '')}', '已複製切角 B 破題 Hook！')" class="text-[10px] text-amber-300 hover:text-white bg-amber-900/60 hover:bg-amber-800 px-2 py-0.5 rounded-md transition">
+                    <button onclick="copyText('${escapeQuotes(item.angleB?.hook || '')}', '已複製切角 B 破題 Hook！')" class="text-[10px] text-amber-300 hover:text-white bg-amber-900/60 hover:bg-amber-800 px-2.5 py-1 rounded-md transition font-medium">
                       複製 Hook
                     </button>
                   </div>
-                  <div class="text-xs font-semibold text-amber-100 mb-1 leading-snug">
+                  <div class="text-xs sm:text-sm font-semibold text-amber-100 mb-1 leading-snug">
                     ${item.angleB?.hook || ''}
                   </div>
-                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2">
+                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2.5">
                     ${item.angleB?.core || ''}
                   </div>
                   ${item.angleB?.defense ? `
-                    <div class="text-[11px] text-amber-300/90 bg-slate-950/60 p-2 rounded-xl mb-1.5 border border-slate-800/50">
+                    <div class="text-[11px] text-amber-300/90 bg-slate-950/60 p-2.5 rounded-xl mb-1.5 border border-slate-800/50 leading-relaxed">
                       <span class="font-bold">🛡️ 自保SOP：</span>${item.angleB?.defense}
                     </div>
                   ` : ''}
@@ -490,10 +576,17 @@
             </div>
 
             <!-- 卡片操作區 -->
-            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
-              <span class="text-[11px] text-slate-500 font-mono">#${item.id}</span>
+            <div class="pt-3.5 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] text-slate-500 font-mono">#${item.id}</span>
+                ${!isFocusMode ? `
+                  <button onclick="handleArticleSelect('${item.id}')" class="text-xs text-slate-400 hover:text-amber-400 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+                    專注閱讀
+                  </button>
+                ` : ''}
+              </div>
 
-              <button onclick="copyFullTopic('${item.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold border border-slate-700 transition shadow-sm">
+              <button onclick="copyFullTopic('${item.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold border border-slate-700 transition shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
                 一鍵全選複製
               </button>
@@ -503,19 +596,36 @@
       }).join('');
     }
 
+    // 下拉選單選擇特定文章處理
+    function handleArticleSelect(id) {
+      selectedArticleId = id;
+      updateArticleDropdown();
+      renderCards();
+      // 切換後平滑滾動至卡片區域頂部
+      window.scrollTo({ top: 180, behavior: 'smooth' });
+    }
+
+    function resetFocusMode() {
+      handleArticleSelect('ALL');
+    }
+
+    // 篩選與搜尋（切換時保留在漏斗中）
     function handleCategoryFilter(cat) {
       currentCategory = cat;
       renderCategoryPills();
+      updateArticleDropdown();
       renderCards();
     }
 
     function handleStatusFilter(status) {
       currentStatus = status;
+      updateArticleDropdown();
       renderCards();
     }
 
     function handleSearch(val) {
       searchQuery = val;
+      updateArticleDropdown();
       renderCards();
     }
 
@@ -523,6 +633,7 @@
       searchQuery = '';
       currentCategory = 'ALL';
       currentStatus = 'ALL';
+      selectedArticleId = 'ALL';
       document.getElementById('searchInput').value = '';
       document.getElementById('statusFilter').value = 'ALL';
       handleCategoryFilter('ALL');
