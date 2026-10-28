@@ -125,7 +125,7 @@
 
     <!-- Toolbar & Filters (大漏斗 + 精準文章選取器) -->
     <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 mb-6 shadow-sm space-y-3.5">
-      <!-- 精準取用器：文章專屬快速選取下拉選單 -->
+      <!-- 指定文章下拉選單 -->
       <div class="bg-slate-950/80 border border-amber-500/30 rounded-xl p-2.5 sm:p-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <div class="flex items-center gap-1.5 text-xs font-bold text-amber-400 flex-shrink-0">
           <span>🎯</span>
@@ -146,7 +146,7 @@
         </div>
       </div>
 
-      <!-- 漏斗第一層：搜尋與狀態篩選 -->
+      <!-- 搜尋與狀態篩選 -->
       <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div class="relative flex-1">
           <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -166,7 +166,7 @@
         </div>
       </div>
 
-      <!-- 漏斗第二層：分類標籤滑動列 -->
+      <!-- 分類標籤滑動列 -->
       <div id="categoryPills" class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-0.5">
         <button onclick="handleCategoryFilter('ALL')" data-cat="ALL" class="cat-pill active px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition bg-amber-500 border-amber-500 text-slate-950 shadow-sm">
           全部議題
@@ -198,13 +198,16 @@
   <script>
     const SPREADSHEET_ID = '1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc';
     const SHEET_NAME = '社群發想靈感庫';
-    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v6';
+    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v7';
+
+    // 磊伯專屬寫文對話網址
+    const SPARK_CHAT_URL = 'https://gemini.google.com/app/396a6770419a0d8e?hl=zh-TW';
 
     let ideas = [];
     let currentCategory = 'ALL';
     let currentStatus = 'ALL';
     let searchQuery = '';
-    let selectedArticleId = 'ALL'; // 方案 A：當前選中的特定文章 ID
+    let selectedArticleId = 'ALL';
 
     document.addEventListener('DOMContentLoaded', () => {
       const cached = localStorage.getItem(STORAGE_KEY);
@@ -338,7 +341,6 @@
       }
     }
 
-    // 核心資料漏斗過濾計算
     function getFilteredIdeas() {
       return ideas.filter(item => {
         if (currentCategory !== 'ALL' && item.category !== currentCategory) return false;
@@ -396,7 +398,6 @@
       }).join('');
     }
 
-    // 更新「文章快速選取下拉選單」的選項（與篩選器完全連動）
     function updateArticleDropdown() {
       const dropdown = document.getElementById('articleSelect');
       const countBadge = document.getElementById('articleCountBadge');
@@ -405,7 +406,6 @@
 
       countBadge.textContent = `共 ${pool.length} 則`;
 
-      // 檢查若選中的 ID 不在過濾後的清單中，自動復原為 ALL
       if (selectedArticleId !== 'ALL' && !pool.some(i => String(i.id) === String(selectedArticleId))) {
         selectedArticleId = 'ALL';
       }
@@ -434,26 +434,24 @@
 
       emptyState.classList.add('hidden');
 
-      // 判斷是否處於單篇專注模式
       const isFocusMode = selectedArticleId !== 'ALL';
       let displayItems = pool;
 
       if (isFocusMode) {
         const focusItem = pool.find(i => String(i.id) === String(selectedArticleId));
         displayItems = focusItem ? [focusItem] : pool;
-        grid.className = "grid grid-cols-1 gap-5 max-w-3xl mx-auto"; // 單篇專注時版面置中放大
+        grid.className = "grid grid-cols-1 gap-5 max-w-3xl mx-auto";
       } else {
         grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-5";
       }
 
-      grid.innerHTML = displayItems.map((item, idx) => {
+      grid.innerHTML = displayItems.map((item) => {
         let statusBadge = 'bg-slate-800 text-slate-300 border-slate-700';
         if (item.status === '可發布') statusBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
         else if (item.status === '待修改') statusBadge = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
         else if (item.status === '已發FB') statusBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
         else if (item.status === '已發Threads') statusBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/30';
 
-        // 專注模式下的前一篇/下一篇邏輯
         let focusNavHtml = '';
         if (isFocusMode) {
           const currentIndex = pool.findIndex(i => String(i.id) === String(item.id));
@@ -509,14 +507,14 @@
               ` : ''}
 
               <!-- 雙切角靈感區 -->
-              <div class="space-y-3.5 mb-4">
+              <div class="space-y-4 mb-4">
                 <!-- 切角 A (老闆/人資避險) -->
-                <div class="bg-blue-950/30 border border-blue-900/40 rounded-2xl p-3.5 sm:p-4 relative group">
-                  <div class="flex items-center justify-between mb-1.5">
+                <div class="bg-blue-950/30 border border-blue-900/40 rounded-2xl p-3.5 sm:p-4 relative">
+                  <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-blue-400 flex items-center gap-1">
                       <span>🛡️</span> 切角 A：${item.angleA?.audience || '老闆/人資避險'}
                     </span>
-                    <button onclick="copyText('${escapeQuotes(item.angleA?.hook || '')}', '已複製切角 A 破題 Hook！')" class="text-[10px] text-blue-300 hover:text-white bg-blue-900/60 hover:bg-blue-800 px-2.5 py-1 rounded-md transition font-medium">
+                    <button onclick="copyText('${escapeQuotes(item.angleA?.hook || '')}', '已複製切角 A 破題 Hook！')" class="text-[10px] text-blue-300 hover:text-white bg-blue-900/60 hover:bg-blue-800 px-2 py-0.5 rounded-md transition font-medium">
                       複製 Hook
                     </button>
                   </div>
@@ -532,19 +530,27 @@
                     </div>
                   ` : ''}
                   ${item.angleA?.cta ? `
-                    <div class="text-[11px] text-slate-400">
+                    <div class="text-[11px] text-slate-400 mb-3">
                       <span class="text-slate-500 font-semibold">📣 互動CTA：</span>${item.angleA?.cta}
                     </div>
                   ` : ''}
+
+                  <!-- 專屬喚醒 Spark 按鈕 (切角 A) -->
+                  <div class="pt-2 border-t border-blue-900/40 flex justify-end">
+                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_A')" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-900/40 transition">
+                      <span>⚡ 帶入Spark寫FB長文</span>
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </button>
+                  </div>
                 </div>
 
                 <!-- 切角 B (上班族/Threads熱議) -->
-                <div class="bg-amber-950/30 border border-amber-900/40 rounded-2xl p-3.5 sm:p-4 relative group">
-                  <div class="flex items-center justify-between mb-1.5">
+                <div class="bg-amber-950/30 border border-amber-900/40 rounded-2xl p-3.5 sm:p-4 relative">
+                  <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-amber-400 flex items-center gap-1">
                       <span>🔥</span> 切角 B：${item.angleB?.audience || '上班族/Threads熱議'}
                     </span>
-                    <button onclick="copyText('${escapeQuotes(item.angleB?.hook || '')}', '已複製切角 B 破題 Hook！')" class="text-[10px] text-amber-300 hover:text-white bg-amber-900/60 hover:bg-amber-800 px-2.5 py-1 rounded-md transition font-medium">
+                    <button onclick="copyText('${escapeQuotes(item.angleB?.hook || '')}', '已複製切角 B 破題 Hook！')" class="text-[10px] text-amber-300 hover:text-white bg-amber-900/60 hover:bg-amber-800 px-2 py-0.5 rounded-md transition font-medium">
                       複製 Hook
                     </button>
                   </div>
@@ -560,10 +566,18 @@
                     </div>
                   ` : ''}
                   ${item.angleB?.cta ? `
-                    <div class="text-[11px] text-slate-400">
+                    <div class="text-[11px] text-slate-400 mb-3">
                       <span class="text-slate-500 font-semibold">📣 互動CTA：</span>${item.angleB?.cta}
                     </div>
                   ` : ''}
+
+                  <!-- 專屬喚醒 Spark 按鈕 (切角 B) -->
+                  <div class="pt-2 border-t border-amber-900/40 flex justify-end">
+                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_B')" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold shadow-md shadow-amber-900/30 transition">
+                      <span>⚡ 帶入Spark寫Threads串文</span>
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -596,12 +610,60 @@
       }).join('');
     }
 
-    // 下拉選單選擇特定文章處理
+    // 核心動作：打包 Prompt 並喚醒 Chrome 前往專屬對話
+    function launchSparkPrompt(id, angleType) {
+      const item = ideas.find(i => String(i.id) === String(id));
+      if (!item) return;
+
+      const isAngleA = angleType === 'ANGLE_A';
+      const platformName = isAngleA ? 'Facebook 專業長文' : 'Threads 爆款串文';
+      const targetAngle = isAngleA ? item.angleA : item.angleB;
+
+      // 專屬擴寫觸發指令
+      const promptText = `請使用你學習過的「磊伯」個人專屬風格與寫作Skill，將以下素材擴寫為一篇【${platformName}】：
+
+【主題名稱】：${item.title}
+【時事與爭點】：${item.controversy || '請依主題自由延伸實務常見勞資爭端'}
+【指定破題 Hook】：${targetAngle?.hook || ''}
+【核心觀點】：${targetAngle?.core || ''}
+【防禦 SOP】：${targetAngle?.defense || ''}
+【互動 CTA】：${targetAngle?.cta || ''}
+
+【核心排版與風格要求】：
+1. 嚴格落實「標點符號即斷行」原則，每句話在逗號、句號、問號處直接換行，每行單獨成句，絕不堆疊大段落。
+2. 中文與英文或數字緊密相連，不加空格。
+3. 語氣兼具專業顧問避險思維與白話痛點共鳴。
+4. 結構：震撼破題 -> 時事爭議爆點 -> 勞動法規地雷拆解 -> 磊伯實務合規 SOP -> 結尾金句與留言互動。`;
+
+      // 1. 寫入剪貼簿
+      copyText(promptText, `已複製【${item.title}】擴寫指令！即將前往 Spark 專屬對話...`);
+
+      // 2. 強制跳出 LINE 開啟外部 Chrome 瀏覽器
+      setTimeout(() => {
+        const ua = navigator.userAgent || '';
+        const isLine = ua.includes('Line') || ua.includes('LINE');
+        const isAndroid = ua.includes('Android');
+
+        if (isAndroid && isLine) {
+          // Android + LINE 環境：使用 Chrome Intent 強制喚醒獨立 Chrome
+          const cleanUrl = SPARK_CHAT_URL.replace('https://', '');
+          const intentUrl = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end`;
+          window.location.href = intentUrl;
+        } else if (isLine) {
+          // iOS 或其他 LINE 環境：加上 openExternalBrowser 參數
+          const delimiter = SPARK_CHAT_URL.includes('?') ? '&' : '?';
+          window.location.href = `${SPARK_CHAT_URL}${delimiter}openExternalBrowser=1`;
+        } else {
+          // 一般瀏覽器直接開新分頁
+          window.open(SPARK_CHAT_URL, '_blank');
+        }
+      }, 600);
+    }
+
     function handleArticleSelect(id) {
       selectedArticleId = id;
       updateArticleDropdown();
       renderCards();
-      // 切換後平滑滾動至卡片區域頂部
       window.scrollTo({ top: 180, behavior: 'smooth' });
     }
 
@@ -609,7 +671,6 @@
       handleArticleSelect('ALL');
     }
 
-    // 篩選與搜尋（切換時保留在漏斗中）
     function handleCategoryFilter(cat) {
       currentCategory = cat;
       renderCategoryPills();
