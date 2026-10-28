@@ -388,4 +388,221 @@
 
       grid.innerHTML = filtered.map(item => {
         let statusBadge = 'bg-slate-800 text-slate-300 border-slate-700';
-        if (item.status === '可發布') statusBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-50
+        if (item.status === '可發布') statusBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        else if (item.status === '待修改') statusBadge = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        else if (item.status === '已發FB') statusBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        else if (item.status === '已發Threads') statusBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+
+        return `
+          <article class="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-3xl p-5 shadow-lg flex flex-col justify-between transition-all duration-200">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/80">
+                    ${item.category}
+                  </span>
+                  <span class="text-xs text-slate-500 font-mono">${item.date}</span>
+                </div>
+                
+                <span class="text-xs font-medium rounded-lg px-2.5 py-1 border ${statusBadge}">
+                  ${item.status}
+                </span>
+              </div>
+
+              <h2 class="text-base sm:text-lg font-bold text-white mb-2 leading-snug hover:text-amber-400 transition">
+                ${item.title}
+              </h2>
+
+              ${item.controversy ? `
+                <div class="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3 mb-4 space-y-1">
+                  <div class="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
+                    <span>⚖️</span>
+                    <span>時事與法令爭點</span>
+                  </div>
+                  <p class="text-xs text-slate-300 leading-relaxed">${item.controversy}</p>
+                </div>
+              ` : ''}
+
+              <div class="space-y-3 mb-4">
+                <!-- 切角 A (老闆/人資避險) -->
+                <div class="bg-blue-950/30 border border-blue-900/40 rounded-2xl p-3.5 relative group">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[11px] font-bold text-blue-400 flex items-center gap-1">
+                      <span>🛡️</span> 切角 A：${item.angleA?.audience || '老闆/人資避險'}
+                    </span>
+                    <button onclick="copyText('${escapeQuotes(item.angleA?.hook || '')}', '已複製切角 A 破題 Hook！')" class="text-[10px] text-blue-300 hover:text-white bg-blue-900/60 hover:bg-blue-800 px-2 py-0.5 rounded-md transition">
+                      複製 Hook
+                    </button>
+                  </div>
+                  <div class="text-xs font-semibold text-blue-100 mb-1 leading-snug">
+                    ${item.angleA?.hook || ''}
+                  </div>
+                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2">
+                    ${item.angleA?.core || ''}
+                  </div>
+                  ${item.angleA?.defense ? `
+                    <div class="text-[11px] text-emerald-400/90 bg-slate-950/60 p-2 rounded-xl mb-1.5 border border-slate-800/50">
+                      <span class="font-bold">🛡️ 防禦SOP：</span>${item.angleA?.defense}
+                    </div>
+                  ` : ''}
+                  ${item.angleA?.cta ? `
+                    <div class="text-[11px] text-slate-400">
+                      <span class="text-slate-500 font-semibold">📣 互動CTA：</span>${item.angleA?.cta}
+                    </div>
+                  ` : ''}
+                </div>
+
+                <!-- 切角 B (上班族/Threads熱議) -->
+                <div class="bg-amber-950/30 border border-amber-900/40 rounded-2xl p-3.5 relative group">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[11px] font-bold text-amber-400 flex items-center gap-1">
+                      <span>🔥</span> 切角 B：${item.angleB?.audience || '上班族/Threads熱議'}
+                    </span>
+                    <button onclick="copyText('${escapeQuotes(item.angleB?.hook || '')}', '已複製切角 B 破題 Hook！')" class="text-[10px] text-amber-300 hover:text-white bg-amber-900/60 hover:bg-amber-800 px-2 py-0.5 rounded-md transition">
+                      複製 Hook
+                    </button>
+                  </div>
+                  <div class="text-xs font-semibold text-amber-100 mb-1 leading-snug">
+                    ${item.angleB?.hook || ''}
+                  </div>
+                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2">
+                    ${item.angleB?.core || ''}
+                  </div>
+                  ${item.angleB?.defense ? `
+                    <div class="text-[11px] text-amber-300/90 bg-slate-950/60 p-2 rounded-xl mb-1.5 border border-slate-800/50">
+                      <span class="font-bold">🛡️ 自保SOP：</span>${item.angleB?.defense}
+                    </div>
+                  ` : ''}
+                  ${item.angleB?.cta ? `
+                    <div class="text-[11px] text-slate-400">
+                      <span class="text-slate-500 font-semibold">📣 互動CTA：</span>${item.angleB?.cta}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+
+              ${item.note ? `
+                <div class="text-[11px] text-slate-400 mb-4 flex items-center gap-1">
+                  <span class="text-slate-500">📝 筆記：</span>
+                  <span>${item.note}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- 卡片操作區 -->
+            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <span class="text-[11px] text-slate-500 font-mono">#${item.id}</span>
+
+              <button onclick="copyFullTopic('${item.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold border border-slate-700 transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                一鍵全選複製
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function handleCategoryFilter(cat) {
+      currentCategory = cat;
+      renderCategoryPills();
+      renderCards();
+    }
+
+    function handleStatusFilter(status) {
+      currentStatus = status;
+      renderCards();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val;
+      renderCards();
+    }
+
+    function clearFilters() {
+      searchQuery = '';
+      currentCategory = 'ALL';
+      currentStatus = 'ALL';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = 'ALL';
+      handleCategoryFilter('ALL');
+    }
+
+    function copyFullTopic(id) {
+      const item = ideas.find(i => String(i.id) === String(id));
+      if (!item) return;
+
+      const fullText = `【${item.title}】
+📅 日期：${item.date}｜分類：${item.category}
+⚖️ 時事爭點：${item.controversy || '無'}
+
+---
+🛡️【切角 A：${item.angleA?.audience || '老闆/人資避險'}】
+破題：${item.angleA?.hook || ''}
+觀點：${item.angleA?.core || ''}
+SOP：${item.angleA?.defense || ''}
+CTA：${item.angleA?.cta || ''}
+
+🔥【切角 B：${item.angleB?.audience || '上班族/Threads熱議'}】
+破題：${item.angleB?.hook || ''}
+觀點：${item.angleB?.core || ''}
+SOP：${item.angleB?.defense || ''}
+CTA：${item.angleB?.cta || ''}
+---
+📝 備註：${item.note || '無'}
+（來自：磊伯勞資充電站 ⚡ 社群發想靈感庫）`;
+
+      copyText(fullText, '已複製整則靈感文案到剪貼簿！');
+    }
+
+    function copyText(text, msg) {
+      if (!navigator.clipboard) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast(msg || '已複製至剪貼簿！');
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(msg || '已複製至剪貼簿！');
+      }).catch(() => {
+        showToast('複製失敗，請手動複製');
+      });
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-[-120%]', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-[-120%]', 'opacity-0');
+      }, 2400);
+    }
+
+    function escapeQuotes(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+    }
+
+    function exportJSONBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(ideas, null, 2));
+      const downloadAnchor = document.createElement('a');
+      const today = new Date().toISOString().split('T')[0];
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `leibo_ideas_sheet_${today}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('已成功下載試算表備份 JSON！');
+    }
+  </script>
+</body>
+</html>
