@@ -91,31 +91,31 @@
     <!-- Metric Dashboard (KPI 數據看板) -->
     <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5">
       <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm">
-        <span class="text-xs text-slate-400 font-medium">總靈感庫存</span>
+        <span class="text-xs text-slate-400 font-medium">總庫存</span>
         <div class="mt-1 flex items-baseline justify-between">
           <span id="metricTotal" class="text-2xl font-black text-white">0</span>
           <span class="text-[10px] text-slate-500">則</span>
         </div>
       </div>
-      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm">
-        <span class="text-xs text-emerald-400 font-medium">可發布</span>
+      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm cursor-pointer hover:border-amber-500/50 transition" onclick="quickFilterStatus('未發布')">
+        <span class="text-xs text-emerald-400 font-medium flex items-center gap-1">✨ 待挑選 (未發布)</span>
         <div class="mt-1 flex items-baseline justify-between">
-          <span id="metricReady" class="text-2xl font-black text-emerald-400">0</span>
-          <span class="text-[10px] text-emerald-500/60">可直接用</span>
+          <span id="metricUnpublished" class="text-2xl font-black text-emerald-400">0</span>
+          <span class="text-[10px] text-emerald-500/60">可寫</span>
         </div>
       </div>
-      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm">
-        <span class="text-xs text-blue-400 font-medium">已發布</span>
+      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm cursor-pointer hover:border-slate-700 transition" onclick="quickFilterStatus('已發布')">
+        <span class="text-xs text-blue-400 font-medium flex items-center gap-1">✔️ 已發布 (已使用)</span>
         <div class="mt-1 flex items-baseline justify-between">
           <span id="metricPublished" class="text-2xl font-black text-blue-400">0</span>
-          <span class="text-[10px] text-blue-500/60">FB / Threads</span>
+          <span class="text-[10px] text-blue-500/60">已用過</span>
         </div>
       </div>
-      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm">
-        <span class="text-xs text-amber-400 font-medium">待修改</span>
+      <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm cursor-pointer hover:border-rose-900/50 transition" onclick="quickFilterStatus('封存')">
+        <span class="text-xs text-rose-400 font-medium flex items-center gap-1">🧊 冷宮 (封存)</span>
         <div class="mt-1 flex items-baseline justify-between">
-          <span id="metricDraft" class="text-2xl font-black text-amber-400">0</span>
-          <span class="text-[10px] text-amber-500/60">調整中</span>
+          <span id="metricArchived" class="text-2xl font-black text-rose-400">0</span>
+          <span class="text-[10px] text-rose-500/60">已收起</span>
         </div>
       </div>
     </section>
@@ -150,14 +150,13 @@
           <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="搜尋議題標題、爭點、切角 Hook、觀點或防禦SOP..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
         </div>
         
+        <!-- 狀態篩選：預設為未發布 -->
         <div class="flex items-center gap-2">
-          <select id="statusFilter" onchange="handleStatusFilter(this.value)" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm text-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 transition">
-            <option value="ALL">全部狀態</option>
-            <option value="可發布">可發布</option>
-            <option value="待修改">待修改</option>
-            <option value="已發FB">已發FB</option>
-            <option value="已發Threads">已發Threads</option>
-            <option value="封存">封存</option>
+          <select id="statusFilter" onchange="handleStatusFilter(this.value)" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm text-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 transition font-semibold">
+            <option value="未發布" selected>✨ 待挑選 (未發布)</option>
+            <option value="封存">🧊 冷宮 (封存)</option>
+            <option value="已發布">✔️ 已發布 (已使用)</option>
+            <option value="ALL">📋 全部狀態文章</option>
           </select>
           <span id="lastSyncTime" class="text-[11px] text-slate-500 font-mono whitespace-nowrap hidden sm:inline">讀取中...</span>
         </div>
@@ -187,22 +186,25 @@
       <div class="inline-flex p-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-500 mb-3 text-3xl">
         🔍
       </div>
-      <p class="text-sm text-slate-400 font-medium">沒有找到符合條件的靈感議題</p>
-      <button onclick="clearFilters()" class="mt-3 text-xs text-amber-400 hover:underline">清除篩選條件</button>
+      <p id="emptyStateMsg" class="text-sm text-slate-400 font-medium">目前沒有待挑選的未發布靈感</p>
+      <button onclick="clearFilters()" class="mt-3 text-xs text-amber-400 hover:underline">重設篩選條件</button>
     </div>
   </main>
 
   <script>
     const SPREADSHEET_ID = '1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc';
     const SHEET_NAME = '社群發想靈感庫';
-    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v9';
+    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v11';
 
     // 磊伯專屬寫文對話網址
     const SPARK_CHAT_URL = 'https://gemini.google.com/app/396a6770419a0d8e?hl=zh-TW';
 
+    // 已成功嵌入磊伯提供的 GAS API 網址
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbybLf0jymB1a8qbLQ7QMcY2YS4CWD9NW2zNhqR6nkWzGbrDs_CoW9aB-QUNNLCB-3VB4g/exec';
+
     let ideas = [];
     let currentCategory = 'ALL';
-    let currentStatus = 'ALL';
+    let currentStatus = '未發布';
     let searchQuery = '';
     let selectedArticleId = 'ALL';
 
@@ -265,6 +267,16 @@
               }
             }
 
+            let rawStatus = getVal(15) || '未發布';
+            let normalizedStatus = '未發布';
+            if (rawStatus === '已發布' || rawStatus === '已發FB' || rawStatus === '已發Threads') {
+              normalizedStatus = '已發布';
+            } else if (rawStatus === '封存' || rawStatus === '冷宮') {
+              normalizedStatus = '封存';
+            } else {
+              normalizedStatus = '未發布';
+            }
+
             return {
               id: id,
               date: dateVal || '2026-10-28',
@@ -285,7 +297,7 @@
                 defense: getVal(13) || '',
                 cta: getVal(14) || ''
               },
-              status: getVal(15) || '可發布',
+              status: normalizedStatus,
               note: getVal(16) || ''
             };
           });
@@ -293,7 +305,7 @@
           persistLocal();
           hideLoading();
           renderAll();
-          showToast(`已載入試算表最新 ${ideas.length} 則靈感！`);
+          showToast(`已自試算表同步 ${ideas.length} 則靈感！`);
         })
         .catch(err => {
           console.error('讀取試算表失敗：', err);
@@ -367,14 +379,14 @@
 
     function renderMetrics() {
       const total = ideas.length;
-      const ready = ideas.filter(i => i.status === '可發布').length;
-      const published = ideas.filter(i => i.status === '已發FB' || i.status === '已發Threads').length;
-      const draft = ideas.filter(i => i.status === '待修改').length;
+      const unpub = ideas.filter(i => i.status === '未發布').length;
+      const pub = ideas.filter(i => i.status === '已發布').length;
+      const arch = ideas.filter(i => i.status === '封存').length;
 
       document.getElementById('metricTotal').textContent = total;
-      document.getElementById('metricReady').textContent = ready;
-      document.getElementById('metricPublished').textContent = published;
-      document.getElementById('metricDraft').textContent = draft;
+      document.getElementById('metricUnpublished').textContent = unpub;
+      document.getElementById('metricPublished').textContent = pub;
+      document.getElementById('metricArchived').textContent = arch;
     }
 
     function renderCategoryPills() {
@@ -421,11 +433,15 @@
     function renderCards() {
       const grid = document.getElementById('cardsGrid');
       const emptyState = document.getElementById('emptyState');
+      const emptyMsg = document.getElementById('emptyStateMsg');
       const pool = getFilteredIdeas();
 
       if (pool.length === 0) {
         grid.innerHTML = '';
         emptyState.classList.remove('hidden');
+        if (currentStatus === '未發布') emptyMsg.textContent = '太棒了！目前沒有待處理的未發布靈感。';
+        else if (currentStatus === '封存') emptyMsg.textContent = '冷宮空空如也，沒有被封存的素材。';
+        else emptyMsg.textContent = '沒有找到符合條件的靈感議題。';
         return;
       }
 
@@ -443,11 +459,15 @@
       }
 
       grid.innerHTML = displayItems.map((item) => {
-        let statusBadge = 'bg-slate-800 text-slate-300 border-slate-700';
-        if (item.status === '可發布') statusBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-        else if (item.status === '待修改') statusBadge = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-        else if (item.status === '已發FB') statusBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
-        else if (item.status === '已發Threads') statusBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+        let statusBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        let statusLabel = '✨ 待挑選';
+        if (item.status === '已發布') {
+          statusBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+          statusLabel = '✔️ 已發布';
+        } else if (item.status === '封存') {
+          statusBadge = 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+          statusLabel = '🧊 冷宮封存';
+        }
 
         let focusNavHtml = '';
         if (isFocusMode) {
@@ -469,11 +489,11 @@
         }
 
         return `
-          <article class="bg-slate-900 border ${isFocusMode ? 'border-amber-500/50 shadow-2xl shadow-amber-500/5' : 'border-slate-800 hover:border-slate-700'} rounded-3xl p-5 sm:p-6 shadow-lg flex flex-col justify-between transition-all duration-200">
+          <article id="card-${item.id}" class="bg-slate-900 border ${isFocusMode ? 'border-amber-500/50 shadow-2xl shadow-amber-500/5' : 'border-slate-800 hover:border-slate-700'} rounded-3xl p-5 sm:p-6 shadow-lg flex flex-col justify-between transition-all duration-300">
             <div>
               ${focusNavHtml}
 
-              <!-- 頂部 Meta 資訊 -->
+              <!-- 頂部 Meta 資訊與操作 -->
               <div class="flex items-center justify-between gap-2 mb-3">
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/80">
@@ -482,9 +502,22 @@
                   <span class="text-xs text-slate-500 font-mono">${item.date}</span>
                 </div>
                 
-                <span class="text-xs font-medium rounded-lg px-2.5 py-1 border ${statusBadge}">
-                  ${item.status}
-                </span>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-medium rounded-lg px-2.5 py-1 border ${statusBadge}">
+                    ${statusLabel}
+                  </span>
+
+                  <!-- 一鍵打入冷宮 / 移出冷宮按鈕 -->
+                  ${item.status !== '封存' ? `
+                    <button onclick="updateStatusViaGas('${item.id}', '封存')" class="text-xs text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 px-2 py-1 rounded-lg border border-slate-800 transition flex items-center gap-1" title="暫不發布，打入冷宮收起">
+                      <span>🧊 入冷宮</span>
+                    </button>
+                  ` : `
+                    <button onclick="updateStatusViaGas('${item.id}', '未發布')" class="text-xs text-emerald-400 hover:bg-emerald-950/40 px-2 py-1 rounded-lg border border-emerald-800/40 transition flex items-center gap-1" title="重新放回待挑選清單">
+                      <span>✨ 移出冷宮</span>
+                    </button>
+                  `}
+                </div>
               </div>
 
               <!-- 議題標題 -->
@@ -605,17 +638,24 @@
                 ` : ''}
               </div>
 
-              <button onclick="copyFullTopic('${item.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold border border-slate-700 transition shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
-                一鍵全選複製
-              </button>
+              <div class="flex items-center gap-2">
+                ${item.status === '未發布' ? `
+                  <button onclick="updateStatusViaGas('${item.id}', '已發布')" class="text-xs text-slate-400 hover:text-blue-400 px-2 py-1.5 rounded-xl hover:bg-slate-800 transition" title="標記為已發布">
+                    標記已發
+                  </button>
+                ` : ''}
+
+                <button onclick="copyFullTopic('${item.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold border border-slate-700 transition shadow-sm">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                  複製素材
+                </button>
+              </div>
             </div>
           </article>
         `;
       }).join('');
     }
 
-    // 解耦架構：傳遞純素材與目標平台
     function launchSparkPrompt(id, angleType, platformType) {
       const item = ideas.find(i => String(i.id) === String(id));
       if (!item) return;
@@ -634,7 +674,11 @@
 【防禦 SOP】：${targetAngle?.defense || ''}
 【互動 CTA】：${targetAngle?.cta || ''}`;
 
-      copyText(promptText, `已複製【${item.title}】素材！前往專屬對話...`);
+      copyText(promptText, `已複製【${item.title}】素材！前往 Spark 對話...`);
+
+      if (item.status !== '已發布') {
+        updateStatusViaGas(id, '已發布', true);
+      }
 
       setTimeout(() => {
         const ua = navigator.userAgent || '';
@@ -652,6 +696,57 @@
           window.open(SPARK_CHAT_URL, '_blank');
         }
       }, 600);
+    }
+
+    function updateStatusViaGas(id, newStatus, silent = false) {
+      const item = ideas.find(i => String(i.id) === String(id));
+      if (!item) return;
+
+      item.status = newStatus;
+      persistLocal();
+
+      if (currentStatus === '未發布' && newStatus !== '未發布') {
+        const el = document.getElementById(`card-${id}`);
+        if (el) {
+          el.classList.add('opacity-0', 'scale-95');
+          setTimeout(() => {
+            renderAll();
+          }, 250);
+        } else {
+          renderAll();
+        }
+      } else {
+        renderAll();
+      }
+
+      if (!silent) {
+        if (newStatus === '封存') showToast('已打入冷宮！可由狀態選單翻找');
+        else showToast(`已變更為「${newStatus}」`);
+      }
+
+      if (GAS_API_URL && GAS_API_URL !== 'YOUR_GAS_DEPLOYED_URL_HERE') {
+        fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ id: id, status: newStatus })
+        })
+        .then(res => res.json())
+        .then(resData => {
+          if (resData.status !== 'success') {
+            console.warn('GAS 回寫狀態失敗：', resData);
+          }
+        })
+        .catch(err => {
+          console.error('GAS 網路回寫錯誤：', err);
+        });
+      }
+    }
+
+    function quickFilterStatus(status) {
+      currentStatus = status;
+      document.getElementById('statusFilter').value = status;
+      selectedArticleId = 'ALL';
+      renderAll();
     }
 
     function handleArticleSelect(id) {
@@ -674,6 +769,7 @@
 
     function handleStatusFilter(status) {
       currentStatus = status;
+      selectedArticleId = 'ALL';
       updateArticleDropdown();
       renderCards();
     }
@@ -687,10 +783,10 @@
     function clearFilters() {
       searchQuery = '';
       currentCategory = 'ALL';
-      currentStatus = 'ALL';
+      currentStatus = '未發布';
       selectedArticleId = 'ALL';
       document.getElementById('searchInput').value = '';
-      document.getElementById('statusFilter').value = 'ALL';
+      document.getElementById('statusFilter').value = '未發布';
       handleCategoryFilter('ALL');
     }
 
