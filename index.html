@@ -194,12 +194,12 @@
   <script>
     const SPREADSHEET_ID = '1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc';
     const SHEET_NAME = '社群發想靈感庫';
-    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v11';
+    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v12';
 
     // 磊伯專屬寫文對話網址
     const SPARK_CHAT_URL = 'https://gemini.google.com/app/396a6770419a0d8e?hl=zh-TW';
 
-    // 已成功嵌入磊伯提供的 GAS API 網址
+    // 磊伯專屬 GAS 狀態回寫 API 網址
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbybLf0jymB1a8qbLQ7QMcY2YS4CWD9NW2zNhqR6nkWzGbrDs_CoW9aB-QUNNLCB-3VB4g/exec';
 
     let ideas = [];
@@ -459,16 +459,6 @@
       }
 
       grid.innerHTML = displayItems.map((item) => {
-        let statusBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-        let statusLabel = '✨ 待挑選';
-        if (item.status === '已發布') {
-          statusBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
-          statusLabel = '✔️ 已發布';
-        } else if (item.status === '封存') {
-          statusBadge = 'bg-rose-500/10 text-rose-400 border-rose-500/30';
-          statusLabel = '🧊 冷宮封存';
-        }
-
         let focusNavHtml = '';
         if (isFocusMode) {
           const currentIndex = pool.findIndex(i => String(i.id) === String(item.id));
@@ -488,13 +478,28 @@
           `;
         }
 
+        // 方案 A：三段式狀態膠囊樣式定義
+        const isUnpub = item.status === '未發布';
+        const isPub = item.status === '已發布';
+        const isArch = item.status === '封存';
+
+        const btnUnpubClass = isUnpub 
+          ? "bg-emerald-500 text-slate-950 font-bold shadow-sm" 
+          : "text-slate-400 hover:text-emerald-400 hover:bg-slate-800/80";
+        const btnPubClass = isPub 
+          ? "bg-blue-600 text-white font-bold shadow-sm" 
+          : "text-slate-400 hover:text-blue-400 hover:bg-slate-800/80";
+        const btnArchClass = isArch 
+          ? "bg-rose-600 text-white font-bold shadow-sm" 
+          : "text-slate-400 hover:text-rose-400 hover:bg-slate-800/80";
+
         return `
           <article id="card-${item.id}" class="bg-slate-900 border ${isFocusMode ? 'border-amber-500/50 shadow-2xl shadow-amber-500/5' : 'border-slate-800 hover:border-slate-700'} rounded-3xl p-5 sm:p-6 shadow-lg flex flex-col justify-between transition-all duration-300">
             <div>
               ${focusNavHtml}
 
-              <!-- 頂部 Meta 資訊與操作 -->
-              <div class="flex items-center justify-between gap-2 mb-3">
+              <!-- 頂部 Meta 資訊與方案 A 三段式狀態切換膠囊 -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/80">
                     ${item.category}
@@ -502,21 +507,17 @@
                   <span class="text-xs text-slate-500 font-mono">${item.date}</span>
                 </div>
                 
-                <div class="flex items-center gap-1.5">
-                  <span class="text-xs font-medium rounded-lg px-2.5 py-1 border ${statusBadge}">
-                    ${statusLabel}
-                  </span>
-
-                  <!-- 一鍵打入冷宮 / 移出冷宮按鈕 -->
-                  ${item.status !== '封存' ? `
-                    <button onclick="updateStatusViaGas('${item.id}', '封存')" class="text-xs text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 px-2 py-1 rounded-lg border border-slate-800 transition flex items-center gap-1" title="暫不發布，打入冷宮收起">
-                      <span>🧊 入冷宮</span>
-                    </button>
-                  ` : `
-                    <button onclick="updateStatusViaGas('${item.id}', '未發布')" class="text-xs text-emerald-400 hover:bg-emerald-950/40 px-2 py-1 rounded-lg border border-emerald-800/40 transition flex items-center gap-1" title="重新放回待挑選清單">
-                      <span>✨ 移出冷宮</span>
-                    </button>
-                  `}
+                <!-- 三段式膠囊按鈕群 (單鍵即點即切) -->
+                <div class="inline-flex self-start sm:self-auto items-center p-0.5 rounded-xl bg-slate-950/90 border border-slate-800 text-[11px] font-medium">
+                  <button onclick="updateStatusViaGas('${item.id}', '未發布')" class="px-2 py-1 rounded-lg transition ${btnUnpubClass}" title="設為待挑選">
+                    ✨ 待挑
+                  </button>
+                  <button onclick="updateStatusViaGas('${item.id}', '已發布')" class="px-2 py-1 rounded-lg transition ${btnPubClass}" title="設為已發布">
+                    ✔️ 已發
+                  </button>
+                  <button onclick="updateStatusViaGas('${item.id}', '封存')" class="px-2 py-1 rounded-lg transition ${btnArchClass}" title="打入冷宮封存">
+                    🧊 冷宮
+                  </button>
                 </div>
               </div>
 
@@ -638,18 +639,10 @@
                 ` : ''}
               </div>
 
-              <div class="flex items-center gap-2">
-                ${item.status === '未發布' ? `
-                  <button onclick="updateStatusViaGas('${item.id}', '已發布')" class="text-xs text-slate-400 hover:text-blue-400 px-2 py-1.5 rounded-xl hover:bg-slate-800 transition" title="標記為已發布">
-                    標記已發
-                  </button>
-                ` : ''}
-
-                <button onclick="copyFullTopic('${item.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold border border-slate-700 transition shadow-sm">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
-                  複製素材
-                </button>
-              </div>
+              <button onclick="copyFullTopic('${item.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold border border-slate-700 transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                複製素材
+              </button>
             </div>
           </article>
         `;
@@ -676,6 +669,7 @@
 
       copyText(promptText, `已複製【${item.title}】素材！前往 Spark 對話...`);
 
+      // 點擊寫文自動切換為「已發布」
       if (item.status !== '已發布') {
         updateStatusViaGas(id, '已發布', true);
       }
@@ -698,6 +692,7 @@
       }, 600);
     }
 
+    // 透過 GAS 背景回寫狀態
     function updateStatusViaGas(id, newStatus, silent = false) {
       const item = ideas.find(i => String(i.id) === String(id));
       if (!item) return;
@@ -705,7 +700,8 @@
       item.status = newStatus;
       persistLocal();
 
-      if (currentStatus === '未發布' && newStatus !== '未發布') {
+      // 當前處於過濾檢視模式時，卡片平滑淡出移出視野
+      if (currentStatus !== 'ALL' && item.status !== currentStatus) {
         const el = document.getElementById(`card-${id}`);
         if (el) {
           el.classList.add('opacity-0', 'scale-95');
@@ -720,8 +716,9 @@
       }
 
       if (!silent) {
-        if (newStatus === '封存') showToast('已打入冷宮！可由狀態選單翻找');
-        else showToast(`已變更為「${newStatus}」`);
+        if (newStatus === '封存') showToast('已打入冷宮！');
+        else if (newStatus === '已發布') showToast('已標記為已發布！');
+        else showToast('已恢復為待挑選！');
       }
 
       if (GAS_API_URL && GAS_API_URL !== 'YOUR_GAS_DEPLOYED_URL_HERE') {
