@@ -143,15 +143,20 @@
         </div>
       </div>
 
-      <!-- 搜尋與狀態篩選 -->
+      <!-- 搜尋、狀態篩選與來源篩選 -->
       <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div class="relative flex-1">
           <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="搜尋議題標題、爭點、切角 Hook、觀點或防禦SOP..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="搜尋議題名稱、爭點、Hook、核心觀點或防禦SOP..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
         </div>
         
-        <!-- 狀態篩選：預設為未發布 -->
         <div class="flex items-center gap-2">
+          <!-- 來源篩選下拉選單 -->
+          <select id="sourceFilter" onchange="handleSourceFilter(this.value)" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm text-slate-300 rounded-xl px-2.5 py-2 focus:outline-none focus:border-amber-500 transition">
+            <option value="ALL">所有來源</option>
+          </select>
+
+          <!-- 狀態篩選：預設為未發布 -->
           <select id="statusFilter" onchange="handleStatusFilter(this.value)" class="bg-slate-950 border border-slate-800 text-xs sm:text-sm text-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 transition font-semibold">
             <option value="未發布" selected>✨ 待挑選 (未發布)</option>
             <option value="封存">🧊 冷宮 (封存)</option>
@@ -176,7 +181,7 @@
       <p class="text-sm text-slate-400">正在讀取試算表資料庫...</p>
     </div>
 
-    <!-- Cards Grid (雙切角靈感卡片區) -->
+    <!-- Cards Grid -->
     <section id="cardsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-5 hidden">
       <!-- 卡片由 JavaScript 動態渲染 -->
     </section>
@@ -194,7 +199,7 @@
   <script>
     const SPREADSHEET_ID = '1KU6fOsUmD9tJ2cAcRv9KbuzObNwazRBhXqITz2nfMJc';
     const SHEET_NAME = '社群發想靈感庫';
-    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v12';
+    const STORAGE_KEY = 'leibo_ideas_sheet_cache_v13';
 
     // 磊伯專屬寫文對話網址
     const SPARK_CHAT_URL = 'https://gemini.google.com/app/396a6770419a0d8e?hl=zh-TW';
@@ -205,6 +210,7 @@
     let ideas = [];
     let currentCategory = 'ALL';
     let currentStatus = '未發布';
+    let currentSource = 'ALL';
     let searchQuery = '';
     let selectedArticleId = 'ALL';
 
@@ -267,7 +273,8 @@
               }
             }
 
-            let rawStatus = getVal(15) || '未發布';
+            // K 欄 (index 10) 為發布狀態
+            let rawStatus = getVal(10) || '未發布';
             let normalizedStatus = '未發布';
             if (rawStatus === '已發布' || rawStatus === '已發FB' || rawStatus === '已發Threads') {
               normalizedStatus = '已發布';
@@ -283,22 +290,14 @@
               category: getVal(2) || '重大勞資爭議',
               title: getVal(3) || '未命名議題',
               controversy: getVal(4) || '',
-              angleA: {
-                audience: getVal(5) || '老闆與人資避險視角',
-                hook: getVal(6) || '',
-                core: getVal(7) || '',
-                defense: getVal(8) || '',
-                cta: getVal(9) || ''
-              },
-              angleB: {
-                audience: getVal(10) || '職場與社群視角',
-                hook: getVal(11) || '',
-                core: getVal(12) || '',
-                defense: getVal(13) || '',
-                cta: getVal(14) || ''
-              },
+              audience: getVal(5) || '老闆與人資避險視角',
+              hook: getVal(6) || '',
+              core: getVal(7) || '',
+              defense: getVal(8) || '',
+              cta: getVal(9) || '',
               status: normalizedStatus,
-              note: getVal(16) || ''
+              note: getVal(11) || '',      // L 欄 (index 11) 為備註
+              source: getVal(12) || '對話任務' // M 欄 (index 12) 為文章來源
             };
           });
 
@@ -354,15 +353,15 @@
       return ideas.filter(item => {
         if (currentCategory !== 'ALL' && item.category !== currentCategory) return false;
         if (currentStatus !== 'ALL' && item.status !== currentStatus) return false;
+        if (currentSource !== 'ALL' && item.source !== currentSource) return false;
         if (searchQuery.trim() !== '') {
           const q = searchQuery.toLowerCase();
           const matchTitle = (item.title || '').toLowerCase().includes(q);
           const matchControversy = (item.controversy || '').toLowerCase().includes(q);
-          const matchAHook = (item.angleA?.hook || '').toLowerCase().includes(q);
-          const matchACore = (item.angleA?.core || '').toLowerCase().includes(q);
-          const matchBHook = (item.angleB?.hook || '').toLowerCase().includes(q);
-          const matchBCore = (item.angleB?.core || '').toLowerCase().includes(q);
-          if (!matchTitle && !matchControversy && !matchAHook && !matchACore && !matchBHook && !matchBCore) {
+          const matchHook = (item.hook || '').toLowerCase().includes(q);
+          const matchCore = (item.core || '').toLowerCase().includes(q);
+          const matchDefense = (item.defense || '').toLowerCase().includes(q);
+          if (!matchTitle && !matchControversy && !matchHook && !matchCore && !matchDefense) {
             return false;
           }
         }
@@ -373,6 +372,7 @@
     function renderAll() {
       renderMetrics();
       renderCategoryPills();
+      updateSourceDropdown();
       updateArticleDropdown();
       renderCards();
     }
@@ -404,6 +404,17 @@
             ${label}
           </button>
         `;
+      }).join('');
+    }
+
+    function updateSourceDropdown() {
+      const dropdown = document.getElementById('sourceFilter');
+      const sources = ['ALL', ...new Set(ideas.map(i => i.source).filter(Boolean))];
+
+      dropdown.innerHTML = sources.map(src => {
+        const label = src === 'ALL' ? '所有來源' : `來源: ${src}`;
+        const isSelected = src === currentSource ? 'selected' : '';
+        return `<option value="${src}" ${isSelected}>${label}</option>`;
       }).join('');
     }
 
@@ -478,7 +489,6 @@
           `;
         }
 
-        // 方案 A：三段式狀態膠囊樣式定義
         const isUnpub = item.status === '未發布';
         const isPub = item.status === '已發布';
         const isArch = item.status === '封存';
@@ -498,16 +508,21 @@
             <div>
               ${focusNavHtml}
 
-              <!-- 頂部 Meta 資訊與方案 A 三段式狀態切換膠囊 -->
+              <!-- 頂部 Meta 資訊、來源與三段式狀態膠囊 -->
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                   <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/80">
                     ${item.category}
                   </span>
                   <span class="text-xs text-slate-500 font-mono">${item.date}</span>
+                  ${item.source ? `
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800/60 text-slate-400 border border-slate-700/50">
+                      ${item.source}
+                    </span>
+                  ` : ''}
                 </div>
                 
-                <!-- 三段式膠囊按鈕群 (單鍵即點即切) -->
+                <!-- 三段式膠囊按鈕群 -->
                 <div class="inline-flex self-start sm:self-auto items-center p-0.5 rounded-xl bg-slate-950/90 border border-slate-800 text-[11px] font-medium">
                   <button onclick="updateStatusViaGas('${item.id}', '未發布')" class="px-2 py-1 rounded-lg transition ${btnUnpubClass}" title="設為待挑選">
                     ✨ 待挑
@@ -537,86 +552,43 @@
                 </div>
               ` : ''}
 
-              <!-- 雙切角靈感區 -->
-              <div class="space-y-4 mb-4">
-                <!-- 切角 A (老闆/人資避險) -->
-                <div class="bg-blue-950/30 border border-blue-900/40 rounded-2xl p-3.5 sm:p-4 relative">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-bold text-blue-400 flex items-center gap-1">
-                      <span>🛡️</span> 切角 A：${item.angleA?.audience || '老闆/人資避險'}
-                    </span>
-                    <button onclick="copyText('${escapeQuotes(item.angleA?.hook || '')}', '已複製切角 A 破題 Hook！')" class="text-[10px] text-blue-300 hover:text-white bg-blue-900/60 hover:bg-blue-800 px-2 py-0.5 rounded-md transition font-medium">
-                      複製 Hook
-                    </button>
-                  </div>
-                  <div class="text-xs sm:text-sm font-semibold text-blue-100 mb-1 leading-snug">
-                    ${item.angleA?.hook || ''}
-                  </div>
-                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2.5">
-                    ${item.angleA?.core || ''}
-                  </div>
-                  ${item.angleA?.defense ? `
-                    <div class="text-[11px] text-emerald-400/90 bg-slate-950/60 p-2.5 rounded-xl mb-1.5 border border-slate-800/50 leading-relaxed">
-                      <span class="font-bold">🛡️ 防禦SOP：</span>${item.angleA?.defense}
-                    </div>
-                  ` : ''}
-                  ${item.angleA?.cta ? `
-                    <div class="text-[11px] text-slate-400 mb-3">
-                      <span class="text-slate-500 font-semibold">📣 互動CTA：</span>${item.angleA?.cta}
-                    </div>
-                  ` : ''}
-
-                  <!-- 雙平台擴寫按鈕 (切角 A) -->
-                  <div class="pt-2 border-t border-blue-900/40 flex flex-wrap items-center justify-end gap-2">
-                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_A', 'FB')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-900/40 transition">
-                      <span>⚡ 寫FB貼文</span>
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    </button>
-                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_A', 'THREADS')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-blue-500/40 text-xs font-bold transition">
-                      <span>⚡ 寫Threads短文</span>
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    </button>
-                  </div>
+              <!-- 單一核心觀點區（老闆與人資避險） -->
+              <div class="bg-blue-950/30 border border-blue-900/40 rounded-2xl p-3.5 sm:p-4 mb-4 relative">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] font-bold text-blue-400 flex items-center gap-1">
+                    <span>🛡️</span> ${item.audience || '老闆與人資避險視角'}
+                  </span>
+                  <button onclick="copyText('${escapeQuotes(item.hook || '')}', '已複製破題 Hook！')" class="text-[10px] text-blue-300 hover:text-white bg-blue-900/60 hover:bg-blue-800 px-2 py-0.5 rounded-md transition font-medium">
+                    複製 Hook
+                  </button>
                 </div>
+                <div class="text-xs sm:text-sm font-semibold text-blue-100 mb-1 leading-snug">
+                  ${item.hook || ''}
+                </div>
+                <div class="text-xs text-slate-300/90 leading-relaxed mb-2.5">
+                  ${item.core || ''}
+                </div>
+                ${item.defense ? `
+                  <div class="text-[11px] text-emerald-400/90 bg-slate-950/60 p-2.5 rounded-xl mb-1.5 border border-slate-800/50 leading-relaxed">
+                    <span class="font-bold">🛡️ 防禦SOP：</span>${item.defense}
+                  </div>
+                ` : ''}
+                ${item.cta ? `
+                  <div class="text-[11px] text-slate-400 mb-3">
+                    <span class="text-slate-500 font-semibold">📣 互動CTA：</span>${item.cta}
+                  </div>
+                ` : ''}
 
-                <!-- 切角 B (上班族/Threads熱議) -->
-                <div class="bg-amber-950/30 border border-amber-900/40 rounded-2xl p-3.5 sm:p-4 relative">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-bold text-amber-400 flex items-center gap-1">
-                      <span>🔥</span> 切角 B：${item.angleB?.audience || '上班族/Threads熱議'}
-                    </span>
-                    <button onclick="copyText('${escapeQuotes(item.angleB?.hook || '')}', '已複製切角 B 破題 Hook！')" class="text-[10px] text-amber-300 hover:text-white bg-amber-900/60 hover:bg-amber-800 px-2 py-0.5 rounded-md transition font-medium">
-                      複製 Hook
-                    </button>
-                  </div>
-                  <div class="text-xs sm:text-sm font-semibold text-amber-100 mb-1 leading-snug">
-                    ${item.angleB?.hook || ''}
-                  </div>
-                  <div class="text-xs text-slate-300/90 leading-relaxed mb-2.5">
-                    ${item.angleB?.core || ''}
-                  </div>
-                  ${item.angleB?.defense ? `
-                    <div class="text-[11px] text-amber-300/90 bg-slate-950/60 p-2.5 rounded-xl mb-1.5 border border-slate-800/50 leading-relaxed">
-                      <span class="font-bold">🛡️ 自保SOP：</span>${item.angleB?.defense}
-                    </div>
-                  ` : ''}
-                  ${item.angleB?.cta ? `
-                    <div class="text-[11px] text-slate-400 mb-3">
-                      <span class="text-slate-500 font-semibold">📣 互動CTA：</span>${item.angleB?.cta}
-                    </div>
-                  ` : ''}
-
-                  <!-- 雙平台擴寫按鈕 (切角 B) -->
-                  <div class="pt-2 border-t border-amber-900/40 flex flex-wrap items-center justify-end gap-2">
-                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_B', 'FB')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold transition">
-                      <span>⚡ 寫FB貼文</span>
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    </button>
-                    <button onclick="launchSparkPrompt('${item.id}', 'ANGLE_B', 'THREADS')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-md shadow-amber-900/30 transition">
-                      <span>⚡ 寫Threads短文</span>
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    </button>
-                  </div>
+                <!-- 雙平台擴寫按鈕 -->
+                <div class="pt-2 border-t border-blue-900/40 flex flex-wrap items-center justify-end gap-2">
+                  <button onclick="launchSparkPrompt('${item.id}', 'FB')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-900/40 transition">
+                    <span>⚡ 寫FB貼文</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                  </button>
+                  <button onclick="launchSparkPrompt('${item.id}', 'THREADS')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-blue-500/40 text-xs font-bold transition">
+                    <span>⚡ 寫Threads短文</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                  </button>
                 </div>
               </div>
 
@@ -649,12 +621,10 @@
       }).join('');
     }
 
-    function launchSparkPrompt(id, angleType, platformType) {
+    function launchSparkPrompt(id, platformType) {
       const item = ideas.find(i => String(i.id) === String(id));
       if (!item) return;
 
-      const isAngleA = angleType === 'ANGLE_A';
-      const targetAngle = isAngleA ? item.angleA : item.angleB;
       const platformName = platformType === 'FB' ? 'Facebook 專業貼文' : 'Threads 爆款串文';
 
       const promptText = `請依據「leibo-copywriter」規格，將以下素材擴寫為文案：
@@ -662,14 +632,13 @@
 【發布平台】：${platformName}
 【主題名稱】：${item.title}
 【時事與爭點】：${item.controversy || '依主題延伸常見實務爭議'}
-【指定破題 Hook】：${targetAngle?.hook || ''}
-【核心觀點】：${targetAngle?.core || ''}
-【防禦 SOP】：${targetAngle?.defense || ''}
-【互動 CTA】：${targetAngle?.cta || ''}`;
+【指定破題 Hook】：${item.hook || ''}
+【核心觀點】：${item.core || ''}
+【防禦 SOP】：${item.defense || ''}
+【互動 CTA】：${item.cta || ''}`;
 
       copyText(promptText, `已複製【${item.title}】素材！前往 Spark 對話...`);
 
-      // 點擊寫文自動切換為「已發布」
       if (item.status !== '已發布') {
         updateStatusViaGas(id, '已發布', true);
       }
@@ -692,7 +661,6 @@
       }, 600);
     }
 
-    // 透過 GAS 背景回寫狀態
     function updateStatusViaGas(id, newStatus, silent = false) {
       const item = ideas.find(i => String(i.id) === String(id));
       if (!item) return;
@@ -700,7 +668,6 @@
       item.status = newStatus;
       persistLocal();
 
-      // 當前處於過濾檢視模式時，卡片平滑淡出移出視野
       if (currentStatus !== 'ALL' && item.status !== currentStatus) {
         const el = document.getElementById(`card-${id}`);
         if (el) {
@@ -771,6 +738,13 @@
       renderCards();
     }
 
+    function handleSourceFilter(src) {
+      currentSource = src;
+      selectedArticleId = 'ALL';
+      updateArticleDropdown();
+      renderCards();
+    }
+
     function handleSearch(val) {
       searchQuery = val;
       updateArticleDropdown();
@@ -781,9 +755,11 @@
       searchQuery = '';
       currentCategory = 'ALL';
       currentStatus = '未發布';
+      currentSource = 'ALL';
       selectedArticleId = 'ALL';
       document.getElementById('searchInput').value = '';
       document.getElementById('statusFilter').value = '未發布';
+      document.getElementById('sourceFilter').value = 'ALL';
       handleCategoryFilter('ALL');
     }
 
@@ -792,21 +768,15 @@
       if (!item) return;
 
       const fullText = `【${item.title}】
-📅 日期：${item.date}｜分類：${item.category}
+📅 日期：${item.date}｜分類：${item.category}｜來源：${item.source || '未標註'}
 ⚖️ 時事爭點：${item.controversy || '無'}
 
 ---
-🛡️【切角 A：${item.angleA?.audience || '老闆/人資避險'}】
-破題：${item.angleA?.hook || ''}
-觀點：${item.angleA?.core || ''}
-SOP：${item.angleA?.defense || ''}
-CTA：${item.angleA?.cta || ''}
-
-🔥【切角 B：${item.angleB?.audience || '上班族/Threads熱議'}】
-破題：${item.angleB?.hook || ''}
-觀點：${item.angleB?.core || ''}
-SOP：${item.angleB?.defense || ''}
-CTA：${item.angleB?.cta || ''}
+🛡️【核心觀點：${item.audience || '老闆與人資避險視角'}】
+破題：${item.hook || ''}
+觀點：${item.core || ''}
+SOP：${item.defense || ''}
+CTA：${item.cta || ''}
 ---
 📝 備註：${item.note || '無'}
 （來自：磊伯勞資充電站 ⚡ 社群發想靈感庫）`;
